@@ -82,7 +82,7 @@ void layer_init(int layer){
 
 
 		//->复位各模块（暂时没有复位的地址）
-		//必须对PPU->BBQS_LOOP进行复位
+		  //必须对PPU->BBQS_LOOP进行复位
 		
 		
     //初始化wm ppu参数
@@ -106,18 +106,18 @@ void layer_init(int layer){
 		PPU_CTRL->DC = PPU_DC_SIZE(ppu_config.dc.size) | PPU_DC_STEP(ppu_config.dc.step);
 		PPU_CTRL->POOL = PPU_POOL_EN(ppu_config.pool.en) | PPU_POOL_KERNEL(ppu_config.pool.kernel) | PPU_POOL_SIGN(ppu_config.pool.sign);
 			
-			//FM
+			//初始化FM的配置信息
 		INT_Enable( FM_IRQ,FM_INT_IO,FM_INT_PORT);
 		s2chip_status.module_state.fm = RUNNING;
     //CALL_INT_HANDLER(FM_IRQ);
 		FM_IRQ_HANDLER();
 
     //初始化bm
-    INT_Enable( BFDMA_IRQ,BFDMA_INT_IO,BFDMA_INT_PORT);
-    s2chip_status.module_state.bf = RUNNING;
+    INT_Enable( BMDMA_IRQ,BMDMA_INT_IO,BMDMA_INT_PORT);
+    s2chip_status.module_state.bm = RUNNING;
     //CALL_INT_HANDLER(BFDMA_IRQ);
-		BFDMA_IRQ_HANDLER();
-    WAIT( s2chip_status.module_state.bf == END);
+		BMDMA_IRQ_HANDLER();
+    WAIT( s2chip_status.module_state.bm == END);
     //INT_Disable(BFDMA_IRQ,BFDMA_INT_IO,BFDMA_INT_PORT);
 		PPU_CTRL->BBQS = PPU_BBQS_SYS_LOOP(ppu_config.bbqs.loop) | PPU_BBQS_SYS_SC_EN(ppu_config.bbqs.sc_en) | PPU_BBQS_SYS_SC_SIGN(ppu_config.bbqs.sc_sign);
 }
