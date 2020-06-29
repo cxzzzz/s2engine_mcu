@@ -116,6 +116,11 @@ typedef struct{
             DMAGroupConfig dma;
         }bm;
 
+        struct{
+            uint32_t size;
+            uint32_t step;
+        }dp;
+
     }bbqs;
 
     struct{

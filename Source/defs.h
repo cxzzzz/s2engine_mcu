@@ -115,6 +115,7 @@ extern S2CHIP_STATUS s2chip_status;
 
 struct _PPU_CTRL{
 	uint32_t BBQS ; //0x0
+	uint32_t BBQS_DP ; //0x0
 	uint32_t ACT;
 	uint32_t POOL ; //0x4
 	uint32_t DC;
@@ -125,6 +126,8 @@ extern struct _PPU_CTRL* PPU_CTRL;// = (struct _PPU_CTRL*) PPU_BASE_ADDR ;
 #define PPU_BBQS_SYS_LOOP(x)  (is_true(x)<< 0)
 #define 	PPU_BBQS_SYS_SC_SIGN(x)		(is_true(x)<<23)
 #define		PPU_BBQS_SYS_SC_EN(x)			(is_true(x)<<24)
+#define     PPU_BBQS_DP_SIZE(x)        ((x)<<0)
+#define		PPU_BBQS_DP_STEP(x)	       ((x)<<10)
 
 #define		PPU_ACT_EN(x)	(is_true(x)<<23)
 
