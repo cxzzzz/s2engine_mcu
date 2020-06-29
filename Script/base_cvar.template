@@ -1,0 +1,63 @@
+{% macro format_value( cvar ) -%}
+            {%- if cvar.isList == true -%}
+                {{ array_body(cvar.value) }}
+            {%- elif cvar.isConfig == true  -%}
+                {{  struct_body( cvar.value )  }}
+            {%- elif cvar.isDict == true  -%}
+                {{  struct_body( cvar.value )  }}
+            {%- elif cvar.value is not defined -%}
+                {%- if cvar is string -%}
+                    {%- if '&' in cvar -%}
+                        {{cvar|replace("&","")}}
+                    {%- else -%}
+                        "{{cvar}}"
+                    {%- endif -%}
+                {%- elif cvar is mapping -%}
+                    {{ struct_body(cvar) }}
+                {%- elif cvar is sequence -%}
+                    {{ array_body(cvar) }}
+                {%- elif cvar is number -%}
+                    {{cvar}}
+                {%- else -%}
+                    ERROR:ERROR:ERROR:ERROR:ERROR2
+                {%- endif -%}
+            {%- else -%}  {# error #}
+                ERROR:ERROR:ERROR:ERROR:ERROR
+            {%- endif -%}
+{%- endmacro %}
+
+{% macro struct_body( body )  -%}
+    {  {% for key,value in body.items() -%} 
+            {{key}} : {{  format_value( value ) }},
+        {% endfor %} }
+{%- endmacro %}
+
+{% macro array_body( body ) -%}
+   { {% for cvar in body -%}
+        {{ format_value(cvar) }} ,
+    {%- endfor %} } 
+{%- endmacro %}
+
+{% macro array_declaration( cvar ) -%}
+    {{cvar.typ}} {{cvar.name}}[]={{ array_body(cvar.value) }} ;
+{%- endmacro %}
+
+{% macro var_assignment( cvar ,end=True) -%}
+    {{cvar.name}} = {{ format_value(cvar) }} {%- if end -%} ; {%- endif -%}
+{%- endmacro %}
+
+{% macro var_declaration( cvar ) %}
+{{cvar.typ}} {{cvar.name}}
+        {%- if  cvar.isList -%}[]{%- endif %} = 
+            {{ format_value(cvar) }};
+{%- endmacro %}
+
+{% macro var_declarations( cvars ) -%}
+    {%- for cvar in cvars %}
+        {{ var_declaration(cvar) }}
+    {% endfor -%}
+{%- endmacro %}
+
+#include "defs.h"
+
+{{ var_declarations( var )}}

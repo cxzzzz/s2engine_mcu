@@ -1,0 +1,47 @@
+{% macro format_value( value ) -%}
+            {%- if value is string -%}
+                "{{value}}"
+            {%- elif value is mapping -%} 
+                {{ struct_body(value) }}
+            {%- elif value is sequence -%}
+                {{ array_body(value) }}
+            {%- else -%}
+                {{ value }}
+            {%- endif -%}
+{%- endmacro %}
+
+{% macro struct_body( body )  -%}
+    {  {% for key,value in body.items() -%} 
+            {{key}} : {{  format_value( value ) }},
+        {% endfor %} }
+{%- endmacro %}
+
+{% macro array_body( body ) -%}
+   { {% for value in body -%}
+        {{ format_value(value) }} ,
+        {%- endfor %} } 
+{%- endmacro %}
+
+{% macro array_declaration( type,name,body) -%}
+    {{type}} {{name}}[]={{ array_body(body) }} ;
+{%- endmacro %}
+
+{% macro var_assignment( name,body,end=True) -%}
+    {{name}} = {{ format_value(body) }} {%- if end -%} ; {%- endif -%}
+{%- endmacro %}
+
+{% macro var_declaration( type,name,body) -%}
+    {{type}} {{name}}
+        {%- if body is sequence and body is not mapping -%}[]{%- endif -%} = {{ format_value(body) }};
+{%- endmacro %}
+
+{% macro var_declarations( type, body) -%}
+    {{ type }} 
+    {%- for name,value in body.items() %} {{ name }} = {{ format_value(value) }} {% if loop.last %} ; {% else %} , {% endif %}
+    {%- endfor -%}
+{%- endmacro %}
+
+{# {{ var_declaration( 'int','a',[1,2,3,4]) }}
+{{ var_declaration( 'A','a',{'a':1, 'b':2, 'c':3})}}
+{{ var_declarations( 'A',{ 'a':1,'b':2,'c':3 } ) }}
+#}

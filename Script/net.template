@@ -1,0 +1,4 @@
+{% import "base_cvar.template" as base %}
+
+#include "defs.h"
+{{ base.var_declarations( var )}}
