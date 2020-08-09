@@ -1,5 +1,8 @@
 
 
+#define NO_DMA  //测试用，仅写寄存器，不配置DMA(因为没数据)
+#define NO_WM		//测试用，WM暂时有问题，不对其进行操作
+
 
 #include <stdio.h>
 #include <stdint.h>
@@ -10,9 +13,10 @@
 
 #include "uart_stdout.h"
 #include "CM3DS_MPS2_driver.h"
+#include "CM3DS_function.h"
 #include <stdio.h>
 #include <string.h>
-#include <assert.h>
+//#include <assert.h>
 
 
 #include "defs.h"
@@ -20,10 +24,31 @@
 
 #include "net.h"
 
+
+void pad_init(){
+
+/*
+  HW32_REG(PAD_BASE_ADDR + 0x50) = 0x01 ;//UART_IN_MODE
+  HW32_REG(PAD_BASE_ADDR + 0x58) = 0x01 ;//DATA_OUT_MODE
+  HW32_REG(PAD_BASE_ADDR + 0x5c) = 0x00 ;//DEBUG_MODE
+  */
+
+  PAD_CTRL->uart_in_mode = 0x01; //使能uart
+  /*
+  PAD_CTRL->data_out_mode = 0x01;
+  PAD_CTRL->debug_mode  = 0x00;
+  */
+
+}
+
 void s2chip_init(){
-	s2chip_status.net_config = &net_config;
-	s2chip_status.io_config = &io_config;
+	s2chip_status.net_config = &net;
+	s2chip_status.io_config = &net_io;
+  
+
+	dbg_puts_d("int init start");
 	int_init();
+	dbg_puts_d("int init done");
 }
 
 // 将Net数据Load到片上
@@ -83,12 +108,16 @@ void layer_init(int layer){
 
 		//->复位各模块（暂时没有复位的地址）
 		  //必须对PPU->BBQS_LOOP进行复位
-		
+		RESET(RST_CTRL->bbqs);
 		
     //初始化wm ppu参数
 	
 			//WM
+#ifndef NO_WM
 		WM_CTRL->LOOP = WM_LOOP(s2chip_status.layer_config->wm.loop);
+#else
+		dbg_puts_d("WM Config Skipped");
+#endif
 		
 			//PE
 		PEConfig pe_config = s2chip_status.layer_config->pe;
@@ -103,6 +132,7 @@ void layer_init(int layer){
     //load数据以前需要将loop设为0，避免初始化后就load数据产生错误
 		PPU_CTRL->BBQS = PPU_BBQS_SYS_LOOP(0) | PPU_BBQS_SYS_SC_EN(ppu_config.bbqs.sc_en) | PPU_BBQS_SYS_SC_SIGN(ppu_config.bbqs.sc_sign);
     PPU_CTRL->BBQS_DP = PPU_BBQS_DP_SIZE(ppu_config.bbqs.dp.size) | PPU_BBQS_DP_STEP(ppu_config.bbqs.dp.step);
+		PPU_CTRL->BBQS_CV = PPU_BBQS_CV_OUT_WIDTH(ppu_config.bbqs.cv.out_width) | PPU_BBQS_CV_SC_SHIFT( ppu_config.bbqs.cv.sc_shift ) | PPU_BBQS_CV_SC_WIDTH( ppu_config.bbqs.cv.sc_width);
 		PPU_CTRL->DC = PPU_DC_SIZE(ppu_config.dc.size) | PPU_DC_STEP(ppu_config.dc.step);
 		PPU_CTRL->POOL = PPU_POOL_EN(ppu_config.pool.en) | PPU_POOL_KERNEL(ppu_config.pool.kernel) | PPU_POOL_SIGN(ppu_config.pool.sign);
 			
@@ -127,6 +157,8 @@ void layer_run(int layer){ //主要使能各个dma
     assert( layer < s2chip_status.net_config->layer_length);
 
     layer_init(layer);
+	
+		dbg_puts_d( "layer %d init",layer );
 
     //初始化fmdma wmdma bfdma wbdma
     s2chip_status.module_state.fm = RUNNING;
@@ -164,18 +196,42 @@ void layer_run(int layer){ //主要使能各个dma
 }
 
 int main(){
+	
+    pad_init();
+		UartStdOutInit();
+	
+		printf("uart init");
 
+	
     s2chip_init();
+	
+		dbg_puts_d("s2chip init");
+	
+#ifndef NO_DMA
     net_init();
-
+		dbg_puts_d("net init");
+#else
+		dbg_puts_d("net init skipped");
+#endif
+	
     while(true){
         
+#ifndef NO_DMA
         feature_load();
+				dbg_puts_d("feature loaded");
+#else
+				dbg_puts_d("feature load skipped");
+#endif
 
+
+			
+				
         for(int layer = 0; layer < s2chip_status.net_config->layer_length;layer ++){
             layer_run(layer);
+						dbg_puts_d("layer %d done",layer);
         }
-
+		
         feature_store();
+				dbg_puts_d("feature stored");
     }
 }

@@ -9,11 +9,13 @@
 #include <stdio.h>
 
 #ifndef NDEBUG
-#define dbg_puts(fmt,...) printf(fmt,##__VA_ARGS__)
-#define dbg_puts_d(fmt,...) printf("%s %s %d:"fmt"\n",__FILE__,__FUNCTION__,__LINE__, ##__VA_ARGS__)
+#define dbg_puts(fmt,...) printf(fmt,##__VA_ARGS__);
+#define dbg_puts_d(fmt,...) printf("%s:%s:%d:"fmt"\n",__FILE__,__FUNCTION__,__LINE__, ##__VA_ARGS__);
+#define assert( cond) if( !(cond)) printf("%s:%s:%d: assertion false",__FILE__,__FUNCTION__,__LINE__);
 #else
 #define dbg_puts(fmt,...)
 #define dbg_puts_d(fmt,...)
+#define assert(cond) 
 #endif
 
 #define true 1
@@ -88,7 +90,7 @@ typedef struct {
 
 }S2CHIP_STATUS;
 
-extern S2CHIP_STATUS s2chip_status;
+extern volatile S2CHIP_STATUS s2chip_status;
 
 
 
@@ -96,18 +98,21 @@ extern S2CHIP_STATUS s2chip_status;
 #define WAIT( cond ) while(!(cond)){ }
 
 
-#define PPU_BASE_ADDR 0x100
+#define PPU_BASE_ADDR 	0x402b0000
 
-#define PE_BASE_ADDR 0x200
+#define PE_BASE_ADDR		0x402a0000
 
-#define DMA_BASE_ADDR 0x300 
+#define DMA_BASE_ADDR		0x40260000
 
-#define SDRAM_BASE_ADDR 0x400
+#define SDRAM_BASE_ADDR	0x40270000
 
-#define FM_BASE_ADDR 0x500
+#define FM_BASE_ADDR 		0x40280000
 
-#define WM_BASE_ADDR 0x600
+#define WM_BASE_ADDR  	0x40290000
 
+#define CLKGEN_BASE_ADDR	0x40250000
+
+#define PAD_BASE_ADDR	0x40220000
 
 
 
@@ -119,10 +124,11 @@ struct _PPU_CTRL{
 	uint32_t ACT;
 	uint32_t POOL ; //0x4
 	uint32_t DC;
-	uint32_t RST;
+	//uint32_t RST;
+	uint32_t BBQS_CV;
 };
 
-extern struct _PPU_CTRL* PPU_CTRL;// = (struct _PPU_CTRL*) PPU_BASE_ADDR ;
+extern volatile struct _PPU_CTRL* PPU_CTRL;// = (struct _PPU_CTRL*) PPU_BASE_ADDR ;
 #define PPU_BBQS_SYS_LOOP(x)  (is_true(x)<< 0)
 #define 	PPU_BBQS_SYS_SC_SIGN(x)		(is_true(x)<<23)
 #define		PPU_BBQS_SYS_SC_EN(x)			(is_true(x)<<24)
@@ -138,6 +144,9 @@ extern struct _PPU_CTRL* PPU_CTRL;// = (struct _PPU_CTRL*) PPU_BASE_ADDR ;
 #define		PPU_DC_SIZE(x)	((x)<<0)
 #define		PPU_DC_STEP(x)	((x)<<10)
 
+#define   PPU_BBQS_CV_SC_WIDTH(x) 	((x)<<0)
+#define		PPU_BBQS_CV_SC_SHIFT(x)  	((x)<<4)
+#define		PPU_BBQS_CV_OUT_WIDTH(x)	((x)<<8)
 /*#define		PPU_RST_BBQS	(1<<0)
 #define		PPU_RST_ACT		(1<<1)
 #define		PPU_RST_POOL	(1<<2)
@@ -152,7 +161,7 @@ struct _PE_CTRL{
 	uint32_t	PE;
 };
 
-extern struct _PE_CTRL* 	PE_CTRL;// = (struct _PE_CTRL*)(PE_BASE_ADDR);
+extern volatile struct _PE_CTRL* 	PE_CTRL;// = (struct _PE_CTRL*)(PE_BASE_ADDR);
 
 #define	PE_COMPRESS_EN(x)	(is_true(x)<<0)
 
@@ -170,7 +179,7 @@ struct _FM_CTRL{
 	uint32_t	CONFIG_ROUND;
 };
 
-extern struct _FM_CTRL*	FM_CTRL ;//= (struct _FM_CTRL*)(FM_BASE_ADDR);
+extern volatile struct _FM_CTRL*	FM_CTRL ;//= (struct _FM_CTRL*)(FM_BASE_ADDR);
 
 #define	FM_KERNEL(x) 	((x)<<24)
 #define	FM_STRIDE(x)	((x)<<20)
@@ -195,7 +204,7 @@ struct _WM_CTRL{
 	uint32_t	LOOP;
 };
 
-extern struct _WM_CTRL* WM_CTRL;// = (struct _WM_CTRL*)(WM_BASE_ADDR);
+extern volatile struct _WM_CTRL* WM_CTRL;// = (struct _WM_CTRL*)(WM_BASE_ADDR);
 
 #define WM_LOOP(x)	((x)<<0)
 
@@ -211,8 +220,49 @@ struct _SDRAM_CTRL{
 		uint32_t	WEIGHT_OFIFO;
 };
 
-extern struct _SDRAM_CTRL* SDRAM_CTRL;// = (struct _SDRAM_CTRL*) SDRAM_BASE_ADDR;
+extern volatile struct _SDRAM_CTRL* SDRAM_CTRL;// = (struct _SDRAM_CTRL*) SDRAM_BASE_ADDR;
 
+
+
+///////////////////CLK_GEN CTRL REG
+struct _CLKGEN_CTRL{
+	
+};
+
+struct _RST_CTRL{
+	uint32_t	ahb;
+	uint32_t	fm;
+	uint32_t	wm;
+	uint32_t	bbqs;
+	uint32_t  act;
+	uint32_t  pooling;
+	uint32_t  dc;
+	uint32_t  compress;
+	uint32_t	pe;
+	uint32_t  ce;
+	uint32_t  alignment;
+	uint32_t  sdram;
+	uint32_t  dma;
+	uint32_t  fifo;
+	uint32_t  dbgctl;
+};
+extern volatile struct _RST_CTRL* RST_CTRL;
+
+
+//////////////////////////// PAD CTRL REG
+struct _PAD_CTRL{
+
+	uint32_t ioen[(0x50)/ (4)]; // 0x0 -- 0x50 
+
+	uint32_t uart_in_mode;	
+	uint32_t bootram_mode;
+	uint32_t data_out_mode;
+	uint32_t debug_mode;
+
+};
+extern volatile struct _PAD_CTRL* PAD_CTRL;
+
+#define RESET(x)  do{(x) = 1;(x) = 0;}while(0)
 /*
 void int_enable( IRQn_Type interrupt){
     //-> 上升沿触发

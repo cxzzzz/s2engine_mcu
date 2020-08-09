@@ -120,6 +120,12 @@ typedef struct{
             uint32_t size;
             uint32_t step;
         }dp;
+				
+				struct{
+					uint32_t sc_width ;
+					uint32_t out_width ;
+					uint32_t sc_shift ;
+				}cv;
 
     }bbqs;
 

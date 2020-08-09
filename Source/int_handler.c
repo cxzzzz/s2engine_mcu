@@ -2,7 +2,7 @@
 #include "defs.h"
 #include "dma.h"
 #include "int_handler.h"
-#include "assert.h"
+
 
 
 void INT_Disable(IRQn_Type IRQ,CM3DS_MPS2_GPIO_TypeDef* gpio,int port){
@@ -25,12 +25,14 @@ void INT_Enable(IRQn_Type IRQ,CM3DS_MPS2_GPIO_TypeDef* gpio,int port){
 void dma_next_round( DMAGroupConfig dma_group_config,volatile int* dma_cnt, int sg_num,
 	 volatile MODULE_STATE*  state, DMA_ID dma_id , IRQn_Type interrupt ,CM3DS_MPS2_GPIO_TypeDef* gpio,int port ){
 
+		dbg_puts_d("%s_irq_handler start",GET_DMA_NAME(dma_id));
+		 
 		int sg;
     assert( *dma_cnt <= dma_group_config.dma_length && *state == RUNNING);
 
     if( *dma_cnt < dma_group_config.dma_length){
 
-				dbg_puts("dma_set:\tid:%s,\tcnt:(%d/%d),\n",GET_DMA_NAME(dma_id),*dma_cnt,dma_group_config.dma_length);
+				dbg_puts_d("dma config:\tid:%s,\tcnt:(%d/%d),",GET_DMA_NAME(dma_id),*dma_cnt,dma_group_config.dma_length);
         
         //重新配置DMA
 			
@@ -58,12 +60,15 @@ void dma_next_round( DMAGroupConfig dma_group_config,volatile int* dma_cnt, int 
 
     }
     else{
+				dbg_puts_d("dma_irq disable");
+			
         *dma_cnt = 0; 
         *state = END;
 				//禁止中断
 				INT_Disable(interrupt,gpio,port);
     }
-
+		dbg_puts_d("%s_irq_handler end",GET_DMA_NAME(dma_id));
+		
     return ;
 }
 	
@@ -78,7 +83,11 @@ void int_init(){
 	//设置output用于软件模拟中断触发
 	//CM3DS_MPS2_gpio_SetOutEnable(CM3DS_MPS2_GPIO0, 0xffff); //set output enable to output on ports [31:0] of GPIO 0
 		
+	//dbg_puts_d("gpio setIntRisingEdge start");
+	
 	CM3DS_MPS2_gpio_SetIntRisingEdge(FM_INT_IO,FM_INT_PORT);
+	
+	
 	CM3DS_MPS2_gpio_SetIntRisingEdge(FMDMA_INT_IO,FMDMA_INT_PORT); //set pin  to rising edge interrupts
 	CM3DS_MPS2_gpio_SetIntRisingEdge(WMDMA_INT_IO,WMDMA_INT_PORT);
 	CM3DS_MPS2_gpio_SetIntRisingEdge(BMDMA_INT_IO,BMDMA_INT_PORT);
@@ -86,8 +95,10 @@ void int_init(){
 	CM3DS_MPS2_gpio_SetIntRisingEdge(IFDMA_INT_IO,IFDMA_INT_PORT);
 	CM3DS_MPS2_gpio_SetIntRisingEdge(OFDMA_INT_IO,OFDMA_INT_PORT);
 	
+	//dbg_puts_d("gpio setIntRisingEdge done");
 	
-	/*NVIC_ClearPendingIRQ(FM_IRQ);				//clear all global NVIC PORT0 pending interrupts
+	/*
+	NVIC_ClearPendingIRQ(FM_IRQ);				//clear all global NVIC PORT0 pending interrupts
 	NVIC_ClearPendingIRQ(FMDMA_IRQ);
 	NVIC_ClearPendingIRQ(WMDMA_IRQ);
 	NVIC_ClearPendingIRQ(BMDMA_IRQ);
@@ -104,9 +115,12 @@ void int_init(){
 	NVIC_EnableIRQ(BFDMA_IRQ);
 	NVIC_EnableIRQ(WBDMA_IRQ);
 	NVIC_EnableIRQ(IFDMA_IRQ);
-	NVIC_EnableIRQ(OFDMA_IRQ);	*/
+	NVIC_EnableIRQ(OFDMA_IRQ);	
+	*/
 	
+	//暂时不启动中断，在各模块初始化好以后再启动
 	/*
+	
 	INT_Enable(FM_IRQ,FM_INT_IO,FM_INT_PORT);
 	INT_Enable(FMDMA_IRQ,FMDMA_INT_IO,FMDMA_INT_PORT);
 	INT_Enable(WMDMA_IRQ,WMDMA_INT_IO,WMDMA_INT_PORT);
@@ -115,8 +129,8 @@ void int_init(){
 	INT_Enable(WBDMA_IRQ,WBDMA_INT_IO,WBDMA_INT_PORT);
 	INT_Enable(IFDMA_IRQ,IFDMA_INT_IO,IFDMA_INT_PORT);
 	INT_Enable(OFDMA_IRQ,OFDMA_INT_IO,OFDMA_INT_PORT);
+	
 	*/
-
 }
 
 
@@ -124,7 +138,8 @@ void int_init(){
 //INT_HANDLER( FM_IRQ ){
 void FM_IRQ_HANDLER(){
 
-
+		dbg_puts_d("fm_irq_handler start");
+	
     assert( 
 				(s2chip_status.module_inner_status.fm.config_outer_cnt)
 				<= (s2chip_status.layer_config->fm.loop) &&
@@ -133,6 +148,10 @@ void FM_IRQ_HANDLER(){
         s2chip_status.module_state.fm == RUNNING
         );
 
+		dbg_puts_d("%d,%d,%d,%d",s2chip_status.module_inner_status.fm.config_outer_cnt,
+        s2chip_status.layer_config->fm.loop,
+				s2chip_status.module_inner_status.fm.config_cnt,
+        s2chip_status.layer_config->fm.config_length);
 		
     if( s2chip_status.module_inner_status.fm.config_outer_cnt <
         s2chip_status.layer_config->fm.loop
@@ -140,7 +159,7 @@ void FM_IRQ_HANDLER(){
         s2chip_status.layer_config->fm.config_length )
     {
         //重新配置 FM
-				dbg_puts("fm_set:\tcnt:(%d/%d,%d/%d),\n",s2chip_status.module_inner_status.fm.config_cnt,s2chip_status.layer_config->fm.config_length,
+				dbg_puts_d("fm config:\tcnt:(%d/%d,%d/%d),",s2chip_status.module_inner_status.fm.config_cnt,s2chip_status.layer_config->fm.config_length,
 					s2chip_status.module_inner_status.fm.config_outer_cnt,s2chip_status.layer_config->fm.loop);
         
 				FMRoundConfig fm_config = s2chip_status.layer_config->fm.config[ s2chip_status.module_inner_status.fm.config_cnt];
@@ -153,8 +172,9 @@ void FM_IRQ_HANDLER(){
 				FM_CTRL->CONFIG_ROUND = FM_ROUND_READ_SIG(0) | FM_ROUND_READ_TIMES(0);	
 			
 				//->使能FM
-				
-				
+				//忘了如何使能了
+				dbg_puts_d("fm enable skipped")
+			
 				
 				//更新 计数器
         s2chip_status.module_inner_status.fm.config_cnt ++;
@@ -170,6 +190,7 @@ void FM_IRQ_HANDLER(){
     }
     else{
 				//关闭中断
+				dbg_puts_d("fm_irq disable");
 			
 				s2chip_status.module_inner_status.fm.config_outer_cnt = 0;
         s2chip_status.module_inner_status.fm.config_cnt = 0;
@@ -177,7 +198,8 @@ void FM_IRQ_HANDLER(){
 				
 				INT_Disable(FM_IRQ,FM_INT_IO,FM_INT_PORT);
     }
-  
+		
+		dbg_puts_d("fm_irq_handler start");
 
 }
 
