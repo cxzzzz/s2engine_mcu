@@ -1,6 +1,6 @@
 
-#ifndef DEFS_H
-#define DEFS_H
+#ifndef _DEFS_H
+#define _DEFS_H
 
 #include <stdint.h>
 #include <CM3DS_MPS2_driver.h>
