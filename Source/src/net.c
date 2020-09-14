@@ -27,8 +27,8 @@ FMRoundConfig conv1_fm_config[] =
         round_read_sig : 0,
         dma : {  wr_addr : 0,
         rd_addr : 0,
-        size : 1024,
-        step : 1024,
+        size : 16384,
+        step : 16384,
         loop : 1,
          },
          } , };
@@ -144,3 +144,4 @@ IOConfig net_io =
         dma : net_output_dma,
          },
          };
+						

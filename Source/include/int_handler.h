@@ -11,44 +11,44 @@
 //#define BM_IRQ GPIO0_2_IRQn
 //#define BF_IRQ GPIO0_3_IRQn
 
-#define FM_IRQ      PORT0_0_IRQn
-#define FM_IRQ_HANDLER PORT0_0_Handler
+#define FM_IRQ      64
+#define FM_IRQ_HANDLER FM_IRQ_Handler
 #define FM_INT_IO		CM3DS_MPS2_GPIO0
 #define FM_INT_PORT	0
 
-#define FMDMA_IRQ  		PORT0_1_IRQn
-#define FMDMA_IRQ_HANDLER 	PORT0_1_Handler
+#define FMDMA_IRQ  	61
+#define FMDMA_IRQ_HANDLER 	FMDMA_IRQ_Handler
 #define FMDMA_INT_IO	CM3DS_MPS2_GPIO0
 #define FMDMA_INT_PORT	1
 
-#define WMDMA_IRQ   PORT0_2_IRQn
-#define WMDMA_IRQ_HANDLER 	PORT0_2_Handler
+#define WMDMA_IRQ   60
+#define WMDMA_IRQ_HANDLER 	WMDMA_IRQ_Handler
 #define WMDMA_INT_IO	CM3DS_MPS2_GPIO0
 #define WMDMA_INT_PORT	2
  
-#define BMDMA_IRQ   PORT0_3_IRQn
-#define BMDMA_IRQ_HANDLER 	PORT0_3_Handler
+#define BMDMA_IRQ  	58
+#define BMDMA_IRQ_HANDLER 	BMDMA_IRQ_Handler
 #define BMDMA_INT_IO	CM3DS_MPS2_GPIO0
 #define BMDMA_INT_PORT	3
 
 
-#define BFDMA_IRQ   PORT0_4_IRQn
-#define BFDMA_IRQ_HANDLER 	PORT0_4_Handler
+#define BFDMA_IRQ   59
+#define BFDMA_IRQ_HANDLER 	BFDMA_IRQ_Handler
 #define BFDMA_INT_IO	CM3DS_MPS2_GPIO0
 #define BFDMA_INT_PORT	4
 
-#define WBDMA_IRQ   PORT0_5_IRQn
-#define WBDMA_IRQ_HANDLER 	PORT0_5_Handler
+#define WBDMA_IRQ   57
+#define WBDMA_IRQ_HANDLER 	WBDMA_IRQ_Handler
 #define WBDMA_INT_IO	CM3DS_MPS2_GPIO0
 #define WBDMA_INT_PORT	5
 
-#define IFDMA_IRQ   PORT0_6_IRQn
-#define IFDMA_IRQ_HANDLER 	PORT0_6_Handler
+#define IFDMA_IRQ   63
+#define IFDMA_IRQ_HANDLER 	IFDMA_IRQ_Handler
 #define IFDMA_INT_IO	CM3DS_MPS2_GPIO0
 #define IFDMA_INT_PORT	6
 
-#define OFDMA_IRQ   PORT0_7_IRQn
-#define OFDMA_IRQ_HANDLER 	PORT0_7_Handler
+#define OFDMA_IRQ   62
+#define OFDMA_IRQ_HANDLER 	OFDMA_IRQ_Handler
 #define OFDMA_INT_IO	CM3DS_MPS2_GPIO0
 #define OFDMA_INT_PORT	7
 

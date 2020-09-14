@@ -16,6 +16,7 @@ typedef enum {  //地址作为ID
 	WBDMA 	= 0x40260600,
 }DMA_ID;
 
+
 extern const char* GET_DMA_NAME(DMA_ID id);
 /*
 #define FM_DMA  0
@@ -30,10 +31,20 @@ extern const char* GET_DMA_NAME(DMA_ID id);
 #define DMA_SG_MAX 16
 
 typedef struct _DMA_CTRL{
-	uint32_t CONFIG_START;
-	uint32_t CONFIG_TE_SG_FMEND;
-	uint32_t CONFIG_TIMER;
-	uint32_t RESET;
+	union{
+		struct{
+			uint32_t CONFIG_START;
+			uint32_t CONFIG_TE_SG_FMEND;
+			uint32_t CONFIG_TIMER;
+			uint32_t RESET;
+		}CTRL;
+		struct{
+			uint32_t INFO_0;
+			uint32_t INFO_1;
+			uint32_t INFO_2;
+			uint32_t INFO_3;
+		}INFO;
+	};
 
 	uint32_t VOID[4];
 	
@@ -66,15 +77,19 @@ extern volatile DMA_CTRL* OFDMA_CTRL;
 #define DMA_START(x) (is_true(x) << 0);
 #define DMA_TIMER_EN(x) (is_true(x) << 7);
 
+
 void dma_config(DMA_ID dma, uint32_t timer,uint8_t sg_num,uint8_t fm_end); //0为不设置计时器
 
 void dma_reset(DMA_ID dma);
 
-void dma_int_clear(DMA_ID dma);
+int dma_int_clear(DMA_ID dma);
 
 void dma_sg_set(DMA_ID dma,uint8_t sg_idx,uint32_t rd_addr,uint32_t wr_addr,uint32_t len);
 	
 void dma_enable(DMA_ID dma);
 
+void dma_weight_set(DMA_ID dma,int weight);
+
+int dma_wait(DMA_ID dma);
 
 #endif

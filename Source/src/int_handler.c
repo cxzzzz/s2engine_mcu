@@ -4,21 +4,20 @@
 #include "int_handler.h"
 
 
-
 void INT_Disable(IRQn_Type IRQ,CM3DS_MPS2_GPIO_TypeDef* gpio,int port){
 	NVIC_DisableIRQ(IRQ);
-	CM3DS_MPS2_gpio_ClrIntEnable(gpio,port);
+	//CM3DS_MPS2_gpio_ClrIntEnable(gpio,port);
 }
 
 void INT_Clear(IRQn_Type IRQ,CM3DS_MPS2_GPIO_TypeDef* gpio,int port){
-	CM3DS_MPS2_gpio_IntClear(gpio, port);
+	//CM3DS_MPS2_gpio_IntClear(gpio, port);
 }
 
 void INT_Enable(IRQn_Type IRQ,CM3DS_MPS2_GPIO_TypeDef* gpio,int port){
 	NVIC_ClearPendingIRQ(IRQ);
 	NVIC_EnableIRQ(IRQ);
-	CM3DS_MPS2_gpio_IntClear(gpio, port);
-	CM3DS_MPS2_gpio_SetIntEnable(gpio,port);
+	//CM3DS_MPS2_gpio_IntClear(gpio, port);
+	//CM3DS_MPS2_gpio_SetIntEnable(gpio,port);
 }
 
 
@@ -26,6 +25,9 @@ void dma_next_round( DMAGroupConfig dma_group_config,volatile int* dma_cnt, int 
 	 volatile MODULE_STATE*  state, DMA_ID dma_id , IRQn_Type interrupt ,CM3DS_MPS2_GPIO_TypeDef* gpio,int port ){
 
 		dbg_puts_d("%s_irq_handler start",GET_DMA_NAME(dma_id));
+		 
+		//最开始把dma的中断信号清除
+		dma_int_clear(dma_id);
 		 
 		int sg;
     assert( *dma_cnt <= dma_group_config.dma_length && *state == RUNNING);
@@ -44,30 +46,40 @@ void dma_next_round( DMAGroupConfig dma_group_config,volatile int* dma_cnt, int 
 				for(sg = 0; sg < sg_num ; sg++){
 			
 					DMAConfig* dma_config = & (dma_group_config.dma[ (*dma_cnt) + sg ]);
+					
+					dbg_puts_d("dma sg config:\tid:%s,\tsgidx:%d,\trdaddr:0x%x,\twraddr:0x%x,\tsize:0x%x,",GET_DMA_NAME(dma_id),
+						sg, dma_config->rd_addr,dma_config->wr_addr,dma_config->size);
 			
-					dma_sg_set( dma_id,1, dma_config->rd_addr,dma_config->wr_addr,dma_config->size);
+					dma_sg_set( dma_id,sg, dma_config->rd_addr,dma_config->wr_addr,dma_config->size);
 				}
       
         //清空中断
         
-				dma_int_clear(dma_id);
-				INT_Clear(interrupt,gpio,port);
+				
 
-        //使能DMA
-        dma_enable(dma_id);
 				
 				(*dma_cnt) += sg_num;
+				
+				//dbg_puts_d (" dma_cnt:%d,sg_num:%d",*dma_cnt,sg_num);
+				//dbg_puts_d("%s_irq_handler end",GET_DMA_NAME(dma_id));
 
+        //使能DMA(靠后，尽量防止中断被过早再次进入)
+				INT_Clear(interrupt,gpio,port);
+				//INT_Enable(interrupt,gpio,port);
+        dma_enable(dma_id);
     }
     else{
-				dbg_puts_d("dma_irq disable");
+				//dbg_puts_d("dma_irq disable");
 			
         *dma_cnt = 0; 
         *state = END;
+			
+				//dbg_puts_d("%s_irq_handler end",GET_DMA_NAME(dma_id));
 				//禁止中断
 				INT_Disable(interrupt,gpio,port);
+				//降低dma权重为0,防止占用周期
+				dma_weight_set(dma_id,0);
     }
-		dbg_puts_d("%s_irq_handler end",GET_DMA_NAME(dma_id));
 		
     return ;
 }
@@ -85,15 +97,15 @@ void int_init(){
 		
 	//dbg_puts_d("gpio setIntRisingEdge start");
 	
+	/*
 	CM3DS_MPS2_gpio_SetIntRisingEdge(FM_INT_IO,FM_INT_PORT);
-	
-	
 	CM3DS_MPS2_gpio_SetIntRisingEdge(FMDMA_INT_IO,FMDMA_INT_PORT); //set pin  to rising edge interrupts
 	CM3DS_MPS2_gpio_SetIntRisingEdge(WMDMA_INT_IO,WMDMA_INT_PORT);
 	CM3DS_MPS2_gpio_SetIntRisingEdge(BMDMA_INT_IO,BMDMA_INT_PORT);
 	CM3DS_MPS2_gpio_SetIntRisingEdge(BFDMA_INT_IO,BFDMA_INT_PORT);
 	CM3DS_MPS2_gpio_SetIntRisingEdge(IFDMA_INT_IO,IFDMA_INT_PORT);
 	CM3DS_MPS2_gpio_SetIntRisingEdge(OFDMA_INT_IO,OFDMA_INT_PORT);
+	*/
 	
 	//dbg_puts_d("gpio setIntRisingEdge done");
 	
@@ -136,7 +148,7 @@ void int_init(){
 
 
 //INT_HANDLER( FM_IRQ ){
-void FM_IRQ_HANDLER(){
+void FM_IRQ_Handler(){
 
 		dbg_puts_d("fm_irq_handler start");
 	
@@ -163,16 +175,19 @@ void FM_IRQ_HANDLER(){
 					s2chip_status.module_inner_status.fm.config_outer_cnt,s2chip_status.layer_config->fm.loop);
         
 				FMRoundConfig fm_config = s2chip_status.layer_config->fm.config[ s2chip_status.module_inner_status.fm.config_cnt];
-				FM_CTRL->CONFIG_KER_STR_POOL_CHN  = FM_KERNEL(fm_config.kernel)| FM_STRIDE(fm_config.stride)|FM_POOLING(fm_config.pooling) | FM_CHANNEL(fm_config.shape.channel);
-				FM_CTRL->CONFIG_ROW_COL = FM_ROW(fm_config.shape.height)| FM_COL(fm_config.shape.width);
-				FM_CTRL->CONFIG_PADDING = FM_PADDING_TOP(fm_config.padding.top)|FM_PADDING_BOTTOM(fm_config.padding.bottom)|
+				FM_CTRL->CONFIG_KER_STR_POOL_CHN  = FM_NEW_FLAG | FM_KERNEL(fm_config.kernel)| FM_STRIDE(fm_config.stride)|FM_POOLING(fm_config.pooling) | FM_CHANNEL(fm_config.shape.channel);
+				FM_CTRL->CONFIG_ROW_COL = FM_NEW_FLAG | FM_ROW(fm_config.shape.height)| FM_COL(fm_config.shape.width);
+				FM_CTRL->CONFIG_PADDING = FM_NEW_FLAG | FM_PADDING_TOP(fm_config.padding.top)|FM_PADDING_BOTTOM(fm_config.padding.bottom)|
 							FM_PADDING_LEFT(fm_config.padding.left) | FM_PADDING_RIGHT(fm_config.padding.right);
 				
 				//配置ROUND READ（目前不使用）
-				FM_CTRL->CONFIG_ROUND = FM_ROUND_READ_SIG(0) | FM_ROUND_READ_TIMES(0);	
+			
+				FM_CTRL->CONFIG_ROUND = FM_NEW_FLAG | FM_ROUND_READ_SIG(0) | FM_ROUND_READ_TIMES(0);
+				fm_new_flag_update();
+			
 			
 				//->使能FM
-				//忘了如何使能了
+				//忘了如何使能了 (可能是数据足够就自动启动)
 				dbg_puts_d("fm enable skipped")
 			
 				
@@ -197,16 +212,23 @@ void FM_IRQ_HANDLER(){
         s2chip_status.module_state.fm = END;
 				
 				INT_Disable(FM_IRQ,FM_INT_IO,FM_INT_PORT);
+			
+				//降低dma权重
+				dma_weight_set(FMDMA,0);
     }
 		
-		dbg_puts_d("fm_irq_handler start");
+		dbg_puts_d("fm_irq_handler stop");
 
 }
 
 //INT_HANDLER( FMDMA_IRQ ){
-void FMDMA_IRQ_HANDLER(){
+void FMDMA_IRQ_Handler(){
+	
+		dbg_puts_d("%s_irq_handler start",GET_DMA_NAME(FMDMA));
 		
     assert( s2chip_status.module_state.fm == RUNNING );
+	
+		dma_int_clear(FMDMA);
   
 		//volatile int* dma_outer_cnt = &(s2chip_status.module_inner_status.fmdma.dma_cnt); //外循环，对应loop
 	
@@ -215,12 +237,15 @@ void FMDMA_IRQ_HANDLER(){
 		volatile int* dma_inner_cnt = &(s2chip_status.module_inner_status.fmdma.dma_inner_cnt);
     FMDMAConfig dma_cfg = s2chip_status.layer_config->fm.config[*dma_cnt].dma;
 	
-		
-
 	
-    if( *dma_outer_cnt <  s2chip_status.layer_config->fm.loop &&
-				*dma_cnt < s2chip_status.layer_config->fm.config_length && 
-        *dma_inner_cnt < dma_cfg.loop 
+		dbg_puts_d(" dma_inner_cnt:%d,dma_cnt:%d,dma_outer_cnt:%d , dma_cfg_loop:%d,fm_config_length:%d,fm_loop:%d",
+			*dma_inner_cnt, *dma_cnt, *dma_outer_cnt , dma_cfg.loop, 
+			s2chip_status.layer_config->fm.config_length,s2chip_status.layer_config->fm.loop );
+	
+	
+    if( ((*dma_outer_cnt) <  (s2chip_status.layer_config->fm.loop)) &&
+				((*dma_cnt) < (s2chip_status.layer_config->fm.config_length)) && 
+        ((*dma_inner_cnt) < (dma_cfg.loop)) 
         ){
 				
 				dbg_puts("dma_set:\tid:%s,\tcnt:(%d/%d),\n",GET_DMA_NAME(FMDMA),*dma_cnt,s2chip_status.layer_config->fm.config_length);
@@ -247,10 +272,7 @@ void FMDMA_IRQ_HANDLER(){
 				
 				
 								
-        //使能FMDMA
-				
-				INT_Clear(FMDMA_IRQ,FMDMA_INT_IO,FMDMA_INT_PORT);
-				dma_enable(FMDMA);
+       
 					
 				//更新计数器
 				(*dma_inner_cnt) += dma_configs_len;
@@ -258,27 +280,37 @@ void FMDMA_IRQ_HANDLER(){
 					
 						*dma_inner_cnt = 0;
 						(*dma_cnt) ++;
-						if( *dma_cnt == s2chip_status.layer_config->fm.config_length)
+						if( *dma_cnt >= s2chip_status.layer_config->fm.config_length)
 						{
 							(*dma_outer_cnt) ++;
 							*dma_cnt = 0;
 						}
 				}
 				
+
+				
+				//使能FMDMA
+				
+				INT_Clear(FMDMA_IRQ,FMDMA_INT_IO,FMDMA_INT_PORT);
+				dma_enable(FMDMA);
+				
     }
     else{
+			
+				dbg_puts_d("fmdma disabled");
         //s2chip_status.module_state.fm = END; //更新应该发生在FM结束后
 				s2chip_status.module_inner_status.fmdma.dma_outer_cnt = 0;
         s2chip_status.module_inner_status.fmdma.dma_cnt = 0;
         s2chip_status.module_inner_status.fmdma.dma_inner_cnt = 0;
 				INT_Disable(FMDMA_IRQ,FMDMA_INT_IO,FMDMA_INT_PORT);
+				dma_weight_set(FMDMA,0);
     }
 
 
 }
 
 //INT_HANDLER( WMDMA_IRQ ){
-void WMDMA_IRQ_HANDLER(){
+void WMDMA_IRQ_Handler(){
 
     dma_next_round(s2chip_status.layer_config->wm.dma,
         &(s2chip_status.module_inner_status.wmdma.dma_cnt),1,
@@ -287,7 +319,7 @@ void WMDMA_IRQ_HANDLER(){
 }
 
 //INT_HANDLER( BFDMA_IRQ){
-void BFDMA_IRQ_HANDLER(){
+void BFDMA_IRQ_Handler(){
 
     dma_next_round(s2chip_status.layer_config->ppu.bbqs.bf.dma,
         &(s2chip_status.module_inner_status.bfdma.dma_cnt),1,
@@ -296,7 +328,8 @@ void BFDMA_IRQ_HANDLER(){
 }
 
 //INT_HANDLER( BMDMA_IRQ){
-void BMDMA_IRQ_HANDLER(){
+void BMDMA_IRQ_Handler(){
+//void BMDMA_IRQ_HANDLER(){
 
     dma_next_round(s2chip_status.layer_config->ppu.bbqs.bm.dma,
         &(s2chip_status.module_inner_status.bmdma.dma_cnt),1,
@@ -306,9 +339,7 @@ void BMDMA_IRQ_HANDLER(){
 
 
 //INT_HANDLER(IFDMA_IRQ){
-void IFDMA_IRQ_HANDLER(){
-
-		//dbg_puts_d("ifdma_handler");
+void IFDMA_IRQ_Handler(){
 	
     assert( s2chip_status.module_state.net_load == RUNNING ||
         s2chip_status.module_state.feature_load == RUNNING
@@ -316,6 +347,7 @@ void IFDMA_IRQ_HANDLER(){
 	
 
     if( s2chip_status.module_state.net_load == RUNNING ){
+				dbg_puts_d("net parameter loading");
 
         dma_next_round(  s2chip_status.io_config->net_load,
             &s2chip_status.module_inner_status.net_load.dma_cnt,1,
@@ -323,6 +355,8 @@ void IFDMA_IRQ_HANDLER(){
         );
     }
     else{
+				dbg_puts_d("feature loading");
+			
         dma_next_round(
             s2chip_status.io_config->feature_load,
             &s2chip_status.module_inner_status.feature_load.dma_cnt,1,
@@ -332,7 +366,7 @@ void IFDMA_IRQ_HANDLER(){
 }
 
 //INT_HANDLER(OFDMA_IRQ){
-void OFDMA_IRQ_HANDLER(){
+void OFDMA_IRQ_Handler(){
         dma_next_round(
             s2chip_status.io_config->feature_store,
             &s2chip_status.module_inner_status.feature_store.dma_cnt,1,

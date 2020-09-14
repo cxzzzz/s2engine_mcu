@@ -3,6 +3,7 @@
 
 void s2chip_init(void);
 
+void clock_init(void);
 void pad_init(void);
 
 void net_init(void);

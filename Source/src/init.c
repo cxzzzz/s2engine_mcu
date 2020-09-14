@@ -22,6 +22,17 @@ void pad_init(){
 
 }
 
+void clock_init(){
+  //至少需要初始化分频系数，否则无法产生时钟信号
+
+  CLKGEN_CTRL->DIVIDE.N1 = 4;
+  CLKGEN_CTRL->DIVIDE.N2 = 4;
+  CLKGEN_CTRL->DIVIDE.N3 = 4;
+  CLKGEN_CTRL->DIVIDE.N4 = 4;
+   
+
+}
+
 void s2chip_init(){
 	s2chip_status.net_config = &net;
 	s2chip_status.io_config = &net_io;
@@ -35,6 +46,7 @@ void s2chip_init(){
 // 将Net数据Load到片上
 void net_init(){
     s2chip_status.module_state.net_load = RUNNING;
+		s2chip_status.module_inner_status.net_load.dma_cnt = 0;
     //使能IFIFO中断
     
 	

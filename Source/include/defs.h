@@ -27,6 +27,8 @@
 #define MAX(a,b) ((a)>(b)?(a):(b))
 #define MIN(a,b) ((a)<(b)?(a):(b))
 
+#define BIT(data,b)  ((data)>>(b) & 1) 
+
 
 
 typedef enum{
@@ -181,6 +183,8 @@ struct _FM_CTRL{
 
 extern volatile struct _FM_CTRL*	FM_CTRL ;//= (struct _FM_CTRL*)(FM_BASE_ADDR);
 
+
+
 #define	FM_KERNEL(x) 	((x)<<24)
 #define	FM_STRIDE(x)	((x)<<20)
 #define	FM_POOLING(x)	((x)<<16)
@@ -197,6 +201,10 @@ extern volatile struct _FM_CTRL*	FM_CTRL ;//= (struct _FM_CTRL*)(FM_BASE_ADDR);
 #define	FM_ROUND_READ_SIG(x)		((x)<<14)
 #define	FM_ROUND_READ_TIMES(x)	((x)<<0)
 
+extern  char fm_new_flag ;
+#define FM_NEW_FLAG		((fm_new_flag)<<30)
+void fm_new_flag_update(void);
+
 
 //////////////////WM CTRL REG
 
@@ -211,13 +219,17 @@ extern volatile struct _WM_CTRL* WM_CTRL;// = (struct _WM_CTRL*)(WM_BASE_ADDR);
 
 //////////////////SDRAM CTRL REG
 struct _SDRAM_CTRL{
-		uint32_t	WEIGHT_FM;
-		uint32_t	WEIGHT_BM;
-		uint32_t	WEIGHT_BF;
-		uint32_t	WEIGHT_WM;
-		uint32_t	WEIGHT_IFIFO;
-		uint32_t	WEIGHT_SDRAM;
+		uint32_t 	WEIGHT_IFIFO;
 		uint32_t	WEIGHT_OFIFO;
+		uint32_t	WEIGHT_FM;
+		uint32_t	WEIGHT_WM;
+		uint32_t	WEIGHT_BF;
+		uint32_t	WEIGHT_BM;
+		uint32_t	WEIGHT_SDRAM;
+
+		//好像这并不是IF,而是M3,不知道为什么走这一路
+		//uint32_t	WEIGHT_IFIFO;
+		uint32_t	WEIGHT_NONE;
 };
 
 extern volatile struct _SDRAM_CTRL* SDRAM_CTRL;// = (struct _SDRAM_CTRL*) SDRAM_BASE_ADDR;
@@ -226,9 +238,62 @@ extern volatile struct _SDRAM_CTRL* SDRAM_CTRL;// = (struct _SDRAM_CTRL*) SDRAM_
 
 ///////////////////CLK_GEN CTRL REG
 struct _CLKGEN_CTRL{
-	
+	uint32_t N;
+	uint32_t M;
+	uint32_t PLL_BYPASS;	
+	uint32_t OD;
+
+	struct{
+		uint32_t	AHB;
+		uint32_t	FM;
+		uint32_t	WM;
+		uint32_t	BBQS;
+		uint32_t	ACT;
+		uint32_t	POOLING;
+		uint32_t	DC;
+		uint32_t 	COMPRESS;
+		uint32_t 	PE;
+		uint32_t 	CE;
+		uint32_t 	ALIGNMENT;
+		uint32_t	SDRAM;
+		uint32_t	DMA;
+		uint32_t	FIFO;
+		uint32_t	DBGCTL;
+	}CLK_SEL;
+
+	struct{
+		uint32_t 	N1;
+		uint32_t	N2;
+		uint32_t	N3;
+		uint32_t	N4;
+	}DIVIDE;
+
+	struct{
+		uint32_t	AHB;
+		uint32_t	FM;
+		uint32_t	WM;
+		uint32_t	BBQS;
+		uint32_t  	ACT;
+		uint32_t  	POOLING;
+		uint32_t  	DC;
+		uint32_t  	COMPRESS;
+		uint32_t	PE;
+		uint32_t  	CE;
+		uint32_t  	ALIGNMENt;
+		uint32_t  	SDRAM;
+		uint32_t  	DMA;
+		uint32_t  	FIFO;
+		uint32_t  	DBGCTL;
+	}RST;
+
+	uint32_t OSC_BYPASS;
 };
 
+extern volatile struct _CLKGEN_CTRL* CLKGEN_CTRL;
+
+#define RESET(x)  do{(x) = 1;(x) = 0;}while(0)
+
+/*
 struct _RST_CTRL{
 	uint32_t	ahb;
 	uint32_t	fm;
@@ -247,12 +312,34 @@ struct _RST_CTRL{
 	uint32_t  dbgctl;
 };
 extern volatile struct _RST_CTRL* RST_CTRL;
-
+*/
 
 //////////////////////////// PAD CTRL REG
 struct _PAD_CTRL{
 
-	uint32_t ioen[(0x50)/ (4)]; // 0x0 -- 0x50 
+	//uint32_t ioen[(0x50)/ (4)]; // 0x0 -- 0x50 
+	struct{
+		uint32_t ie1;
+		uint32_t oen1;
+		uint32_t ie2;
+		uint32_t oen2;
+		uint32_t ie3_1;
+		uint32_t ie3_2;
+		uint32_t ie3_3;
+		uint32_t ie3_4;
+		uint32_t oen3_1;
+		uint32_t oen3_2;
+		uint32_t oen3_3;
+		uint32_t oen3_4;
+		uint32_t ie4_1;
+		uint32_t ie4_2;
+		uint32_t ie4_3;
+		uint32_t ie4_4;
+		uint32_t oen4_1;
+		uint32_t oen4_2;
+		uint32_t oen4_3;
+		uint32_t oen4_4;
+	}ioen;
 
 	uint32_t uart_in_mode;	
 	uint32_t bootram_mode;
@@ -262,7 +349,6 @@ struct _PAD_CTRL{
 };
 extern volatile struct _PAD_CTRL* PAD_CTRL;
 
-#define RESET(x)  do{(x) = 1;(x) = 0;}while(0)
 /*
 void int_enable( IRQn_Type interrupt){
     //-> 上升沿触发
