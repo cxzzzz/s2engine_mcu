@@ -1,5 +1,19 @@
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 #include "defs.h"
+#include "net.h"
 
 
         
@@ -144,4 +158,4 @@ IOConfig net_io =
         dma : net_output_dma,
          },
          };
-						
+    

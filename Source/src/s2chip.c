@@ -89,7 +89,7 @@ void layer_init(int layer){
 		PPUConfig ppu_config = s2chip_status.layer_config->ppu;
 		PPU_CTRL->ACT = PPU_ACT_EN(ppu_config.act.en);
     //load数据以前需要将loop设为0，避免初始化后就load数据产生错误
-		PPU_CTRL->BBQS = PPU_BBQS_SYS_LOOP(0) | PPU_BBQS_SYS_SC_EN(ppu_config.bbqs.sc_en) | PPU_BBQS_SYS_SC_SIGN(ppu_config.bbqs.sc_sign);
+		PPU_CTRL->BBQS = PPU_BBQS_SYS_EN|PPU_BBQS_SYS_LOOP(0) | PPU_BBQS_SYS_SC_EN(ppu_config.bbqs.sc_en) | PPU_BBQS_SYS_SC_SIGN(ppu_config.bbqs.sc_sign);
     PPU_CTRL->BBQS_DP = PPU_BBQS_DP_SIZE(ppu_config.bbqs.dp.size) | PPU_BBQS_DP_STEP(ppu_config.bbqs.dp.step);
 		PPU_CTRL->BBQS_CV = PPU_BBQS_CV_OUT_WIDTH(ppu_config.bbqs.cv.out_width) | PPU_BBQS_CV_SC_SHIFT( ppu_config.bbqs.cv.sc_shift ) | PPU_BBQS_CV_SC_WIDTH( ppu_config.bbqs.cv.sc_width);
 		PPU_CTRL->DC = PPU_DC_SIZE(ppu_config.dc.size) | PPU_DC_STEP(ppu_config.dc.step);
@@ -111,7 +111,7 @@ void layer_init(int layer){
     WAIT( s2chip_status.module_state.bm == END);
 		dbg_puts_d("bm loaded");
     //INT_Disable(BFDMA_IRQ,BFDMA_INT_IO,BFDMA_INT_PORT);
-		PPU_CTRL->BBQS = PPU_BBQS_SYS_LOOP(ppu_config.bbqs.loop) | PPU_BBQS_SYS_SC_EN(ppu_config.bbqs.sc_en) | PPU_BBQS_SYS_SC_SIGN(ppu_config.bbqs.sc_sign);
+		PPU_CTRL->BBQS = PPU_BBQS_SYS_EN |PPU_BBQS_SYS_LOOP(ppu_config.bbqs.loop) | PPU_BBQS_SYS_SC_EN(ppu_config.bbqs.sc_en) | PPU_BBQS_SYS_SC_SIGN(ppu_config.bbqs.sc_sign);
 }
 
 void layer_run(int layer){ //主要使能各个dma

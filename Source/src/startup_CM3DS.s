@@ -143,6 +143,7 @@ __Vectors       DCD     __initial_sp              ; Top of Stack
 				DCD		OFDMA_IRQ_Handler
 				DCD		IFDMA_IRQ_Handler
 				DCD		FM_IRQ_Handler
+				DCD		XXX_IRQ_Handler
 __Vectors_End
 
 __Vectors_Size  EQU     __Vectors_End - __Vectors
@@ -276,6 +277,7 @@ Default_Handler PROC
 				EXPORT	   OFDMA_IRQ_Handler      [WEAK]
 				EXPORT	   IFDMA_IRQ_Handler      [WEAK]
 				EXPORT	   FM_IRQ_Handler         [WEAK]
+				EXPORT     XXX_IRQ_Handler		  [WEAK]
 UART0_Handler
 Spare1_Handler
 UART1_Handler
@@ -341,6 +343,7 @@ FMDMA_IRQ_Handler
 OFDMA_IRQ_Handler
 IFDMA_IRQ_Handler
 FM_IRQ_Handler
+XXX_IRQ_Handler
 
                 B       .
 

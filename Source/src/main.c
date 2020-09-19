@@ -12,6 +12,8 @@ extern int fm_test(void);
 extern int net_test(void);
 
 int main(){
+		//FM_IRQ_Handler();
+		//while(1);
     _main_s2chip();
     //dma_test();
     //reg_test();

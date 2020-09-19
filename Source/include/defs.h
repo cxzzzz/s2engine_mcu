@@ -29,6 +29,8 @@
 
 #define BIT(data,b)  ((data)>>(b) & 1) 
 
+#define DMA_MAX_LEN_16
+
 
 
 typedef enum{
@@ -131,13 +133,14 @@ struct _PPU_CTRL{
 };
 
 extern volatile struct _PPU_CTRL* PPU_CTRL;// = (struct _PPU_CTRL*) PPU_BASE_ADDR ;
-#define PPU_BBQS_SYS_LOOP(x)  (is_true(x)<< 0)
-#define 	PPU_BBQS_SYS_SC_SIGN(x)		(is_true(x)<<23)
-#define		PPU_BBQS_SYS_SC_EN(x)			(is_true(x)<<24)
+#define PPU_BBQS_SYS_LOOP(x)  (x << 0)
+#define 	PPU_BBQS_SYS_SC_SIGN(x)		(is_true(x)<<24)
+#define		PPU_BBQS_SYS_SC_EN(x)			(is_true(x)<<25)
+#define		PPU_BBQS_SYS_EN						(1<<26)
 #define     PPU_BBQS_DP_SIZE(x)        ((x)<<0)
 #define		PPU_BBQS_DP_STEP(x)	       ((x)<<10)
 
-#define		PPU_ACT_EN(x)	(is_true(x)<<23)
+#define		PPU_ACT_EN(x)	(is_true(x)<<0)
 
 #define 	PPU_POOL_EN(x) 		( is_true(x)<<1)
 #define 	PPU_POOL_SIGN(x) 	( is_true(x)<<0)
@@ -179,6 +182,8 @@ struct _FM_CTRL{
 	uint32_t	CONFIG_ROW_COL;
 	uint32_t	CONFIG_PADDING;
 	uint32_t	CONFIG_ROUND;
+	uint32_t  INFO_WR_CNT;
+	uint32_t  INFO_ERROR;
 };
 
 extern volatile struct _FM_CTRL*	FM_CTRL ;//= (struct _FM_CTRL*)(FM_BASE_ADDR);
