@@ -11,7 +11,7 @@
 //#define BM_IRQ GPIO0_2_IRQn
 //#define BF_IRQ GPIO0_3_IRQn
 
-#define FM_IRQ      64
+#define FM_IRQ      56
 #define FM_IRQ_HANDLER FM_IRQ_Handler
 #define FM_INT_IO		CM3DS_MPS2_GPIO0
 #define FM_INT_PORT	0

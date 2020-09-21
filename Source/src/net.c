@@ -13,14 +13,13 @@
 
 
 #include "defs.h"
-#include "net.h"
 
 
         
 DMAConfig conv1_wm_dma_dma[] = 
             { {  rd_addr : 327680,
         wr_addr : 0,
-        size : 18432,
+        size : 10560,
          } , };
     
         
@@ -68,7 +67,7 @@ LayerConfig net_layer[] =
         ce : {  kernel : 3,
         stride : 1,
          },
-        comp : {  en : False,
+        comp : {  en : True,
          },
          },
         wm : {  loop : 64,
@@ -76,7 +75,7 @@ LayerConfig net_layer[] =
         dma : conv1_wm_dma_dma,
          },
          },
-        fm : {  loop : 64,
+        fm : {  loop : 4,
         config_length : 1,
         config : conv1_fm_config,
          },
@@ -126,7 +125,7 @@ NetConfig net =
 DMAConfig net_params_dma[] = 
             { {  rd_addr : 0,
         wr_addr : 327680,
-        size : 18432,
+        size : 10560,
          } ,{  rd_addr : 0,
         wr_addr : 655360,
         size : 512,

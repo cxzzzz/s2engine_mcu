@@ -134,7 +134,8 @@ __Vectors       DCD     __initial_sp              ; Top of Stack
                 DCD     MPS2_SPI4_Handler         ; SPI Handler
                 DCD     PORT4_COMB_Handler        ; GPIO Port 4 Combined Handler
                 DCD     PORT5_COMB_Handler        ; GPIO Port 5 Combined Handler
-                DCD     UART4_Handler             ; UART 4 RX and TX Handler
+                ;DCD     UART4_Handler             ; UART 4 RX and TX Handler
+				DCD		FM_IRQ_Handler
 			    DCD     WBDMA_IRQ_Handler
 				DCD     BMDMA_IRQ_Handler
 			    DCD     BFDMA_IRQ_Handler
@@ -142,7 +143,6 @@ __Vectors       DCD     __initial_sp              ; Top of Stack
 				DCD     FMDMA_IRQ_Handler
 				DCD		OFDMA_IRQ_Handler
 				DCD		IFDMA_IRQ_Handler
-				DCD		FM_IRQ_Handler
 				DCD		XXX_IRQ_Handler
 __Vectors_End
 
@@ -267,8 +267,9 @@ Default_Handler PROC
                 EXPORT MPS2_SPI4_Handler          [WEAK]
                 EXPORT PORT4_COMB_Handler         [WEAK]
                 EXPORT PORT5_COMB_Handler         [WEAK]
-                EXPORT UART4_Handler              [WEAK]
+                ;EXPORT UART4_Handler              [WEAK]
 				; dma interrupt
+				EXPORT	   FM_IRQ_Handler         [WEAK]
 				EXPORT     WBDMA_IRQ_Handler      [WEAK]
 				EXPORT     BMDMA_IRQ_Handler      [WEAK]
 			    EXPORT     BFDMA_IRQ_Handler      [WEAK]
@@ -276,7 +277,6 @@ Default_Handler PROC
 				EXPORT     FMDMA_IRQ_Handler      [WEAK]
 				EXPORT	   OFDMA_IRQ_Handler      [WEAK]
 				EXPORT	   IFDMA_IRQ_Handler      [WEAK]
-				EXPORT	   FM_IRQ_Handler         [WEAK]
 				EXPORT     XXX_IRQ_Handler		  [WEAK]
 UART0_Handler
 Spare1_Handler
@@ -334,7 +334,8 @@ MPS2_SPI3_Handler
 MPS2_SPI4_Handler
 PORT4_COMB_Handler
 PORT5_COMB_Handler
-UART4_Handler
+;UART4_Handler
+FM_IRQ_Handler
 WBDMA_IRQ_Handler
 BMDMA_IRQ_Handler
 BFDMA_IRQ_Handler
@@ -342,7 +343,6 @@ WMDMA_IRQ_Handler
 FMDMA_IRQ_Handler
 OFDMA_IRQ_Handler
 IFDMA_IRQ_Handler
-FM_IRQ_Handler
 XXX_IRQ_Handler
 
                 B       .
