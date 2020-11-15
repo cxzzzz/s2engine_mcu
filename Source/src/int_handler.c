@@ -316,8 +316,8 @@ void FMDMA_IRQ_Handler(){
 				dbg_puts("dma_set:\tid:%s,\tcnt:(%d/%d),\n",GET_DMA_NAME(FMDMA),*dma_cnt,s2chip_status.layer_config->fm.config_length);
 					
 					
-				if( 0){
-					int dma_configs_len = MIN( dma_cfg.loop - *dma_inner_cnt,32);
+				if( 1 ){
+					int dma_configs_len = MIN( dma_cfg.loop - *dma_inner_cnt,DMA_SG_MAX);
 					int fm_end = (dma_configs_len + *dma_inner_cnt)>=dma_cfg.loop;
 						
 						
@@ -326,15 +326,19 @@ void FMDMA_IRQ_Handler(){
 						
 					//配置DMA
 					dma_config( FMDMA, 0, dma_configs_len, fm_end); 
+					dbg_puts("sg_length:%d", dma_configs_len );
 						
 					//配置sg
-					for(int i = 0,rd_addr = dma_cfg.rd_addr,wr_addr = dma_cfg.wr_addr;i< dma_configs_len;i++){
+					for(int i = 0,rd_addr = dma_cfg.rd_addr + (*dma_inner_cnt)*dma_cfg.step ,wr_addr = dma_cfg.wr_addr + (*dma_inner_cnt)*dma_cfg.size
+							;i< dma_configs_len;i++){
 						
 						
 						dma_sg_set(FMDMA,i,rd_addr,wr_addr,dma_cfg.size);
 						
 						rd_addr += dma_cfg.step;
 						wr_addr += dma_cfg.size;
+						
+						
 					}
 					
 					
@@ -437,7 +441,7 @@ void WMDMA_IRQ_Handler(){
 
     dma_next_round(s2chip_status.layer_config->wm.dma,
         &(s2chip_status.module_inner_status.wmdma.dma_cnt),1,
-        &(s2chip_status.module_state.wm), WMDMA,WMDMA_IRQ,WMDMA_INT_IO,WMDMA_INT_PORT,&wm_data_cnt
+        &(s2chip_status.module_state.wm), WMDMA,WMDMA_IRQ,WMDMA_INT_IO,WMDMA_INT_PORT, NULL//&wm_data_cnt
     );
 }
 
@@ -446,7 +450,7 @@ void BFDMA_IRQ_Handler(){
 
     dma_next_round(s2chip_status.layer_config->ppu.bbqs.bf.dma,
         &(s2chip_status.module_inner_status.bfdma.dma_cnt),1,
-        &(s2chip_status.module_state.bf), BFDMA,BFDMA_IRQ,BFDMA_INT_IO,BFDMA_INT_PORT,&bf_data_cnt
+        &(s2chip_status.module_state.bf), BFDMA,BFDMA_IRQ,BFDMA_INT_IO,BFDMA_INT_PORT, NULL//&bf_data_cnt
     );
 }
 
@@ -456,7 +460,7 @@ void BMDMA_IRQ_Handler(){
 
     dma_next_round(s2chip_status.layer_config->ppu.bbqs.bm.dma,
         &(s2chip_status.module_inner_status.bmdma.dma_cnt),1,
-        &(s2chip_status.module_state.bm), BMDMA,BMDMA_IRQ , BMDMA_INT_IO, BMDMA_INT_PORT,&bm_data_cnt
+        &(s2chip_status.module_state.bm), BMDMA,BMDMA_IRQ , BMDMA_INT_IO, BMDMA_INT_PORT,NULL//&bm_data_cnt
     );
 }
 
@@ -493,7 +497,7 @@ void OFDMA_IRQ_Handler(){
         dma_next_round(
             s2chip_status.io_config->feature_store,
             &s2chip_status.module_inner_status.feature_store.dma_cnt,1,
-            &s2chip_status.module_state.feature_store,OFDMA,OFDMA_IRQ, OFDMA_INT_IO , OFDMA_INT_PORT,&ofifo_data_cnt
+            &s2chip_status.module_state.feature_store,OFDMA,OFDMA_IRQ, OFDMA_INT_IO , OFDMA_INT_PORT, NULL//&ofifo_data_cnt
         );
 }
 
@@ -502,6 +506,6 @@ void WBDMA_IRQ_HANDLER(){
     dma_next_round(
         s2chip_status.layer_config->ppu.wb.dma,
         &s2chip_status.module_inner_status.wbdma.dma_cnt,1,
-        &s2chip_status.module_state.wb,WBDMA,WBDMA_IRQ , WBDMA_INT_IO, WBDMA_INT_PORT,&wb_data_cnt
+        &s2chip_status.module_state.wb,WBDMA,WBDMA_IRQ , WBDMA_INT_IO, WBDMA_INT_PORT, NULL//&wb_data_cnt
     );
 }

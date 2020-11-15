@@ -157,13 +157,23 @@ void layer_run(int layer){ //主要使能各个dma
     return;
 }
 
+void pad_set_direction(int input){
+	 PAD_CTRL->ioen.ie1 = is_true(input);
+	 PAD_CTRL->ioen.oen1 = is_true(input);
+}
+
 int _main_s2chip(){
 	
     clock_init();
     pad_init();
 	
+	/*
 		PAD_CTRL->ioen.ie1 = 1;
 		PAD_CTRL->ioen.oen1 = 1;
+	*/
+		pad_set_direction(1);
+	
+	
 	
 		UartStdOutInit();
 		dbg_puts_d("uart init");
@@ -178,17 +188,24 @@ int _main_s2chip(){
 
 	
     while(true){
+				pad_set_direction(1);
         
         feature_load();
 				dbg_puts_d("feature loaded");
 			
 				
         for(int layer = 0; layer < s2chip_status.net_config->layer_length;layer ++){
+						printf(">>>>>>>>>>> layer %d start <<<<<<<<<<<\n",layer);
             layer_run(layer);
-						dbg_puts_d("layer %d done",layer);
+						//dbg_puts_d("layer %d done",layer);
+						printf(">>>>>>>>>>> layer %d done <<<<<<<<<<<\n",layer);
         }
-		
+				
+				pad_set_direction(0);
+				
         feature_store();
-				dbg_puts_d("feature stored");
+				dbg_puts_d("feature stored");		
+				
+				printf(">>>>>>>>>> output done >>>>>>>>>>>>>>>>>>>>");
     }
 }
