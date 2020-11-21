@@ -24,14 +24,17 @@ void pad_init(){
 
 void clock_init(){
   //至少需要初始化分频系数，否则无法产生时钟信号
-
+	//通过设置寄存器初始值，已经不需要初始化
+	
+	/*
   CLKGEN_CTRL->DIVIDE.N1 = 4;
   CLKGEN_CTRL->DIVIDE.N2 = 4;
   CLKGEN_CTRL->DIVIDE.N3 = 4;
   CLKGEN_CTRL->DIVIDE.N4 = 4;
-   
+	*/
 
 }
+
 
 void s2chip_init(){
 	s2chip_status.net_config = &net;

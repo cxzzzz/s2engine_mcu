@@ -8,6 +8,8 @@
 
 #include <stdio.h>
 
+#define NDEBUG
+
 #ifndef NDEBUG
 #define dbg_puts(fmt,...) printf(fmt,##__VA_ARGS__);
 #define dbg_puts_d(fmt,...) printf("%s:%s:%d:"fmt"\n",__FILE__,__FUNCTION__,__LINE__, ##__VA_ARGS__);
@@ -174,6 +176,7 @@ extern volatile struct _PE_CTRL* 	PE_CTRL;// = (struct _PE_CTRL*)(PE_BASE_ADDR);
 #define	PE_CE_KERNEL(x)	((x)<<5)
 
 #define PE_PE_FSIGN(x)	(is_true(x)<<0)
+#define PE_PE_OUTDROP(x)	(is_true(x)<<20)
 
 ////////////////FM CTRL REG
 

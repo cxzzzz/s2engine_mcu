@@ -121,8 +121,8 @@ inline void dma_sg_set(DMA_ID dma,uint8_t sg_idx,uint32_t rd_addr,uint32_t wr_ad
 	assert( len%16 == 0);
 	dma_ctrl -> CONFIG_DMA[sg_idx].RD_ADDR = rd_addr;
 	dma_ctrl -> CONFIG_DMA[sg_idx].WR_ADDR = wr_addr;
-	dma_ctrl -> CONFIG_DMA[sg_idx].LEN = (len/16) - 1;
-	
+	//dma_ctrl -> CONFIG_DMA[sg_idx].LEN = (len/16) - 1;
+	dma_ctrl -> CONFIG_DMA[sg_idx].LEN =  len - 1;
 }
 
 
