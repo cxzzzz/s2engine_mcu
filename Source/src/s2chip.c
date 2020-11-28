@@ -81,7 +81,7 @@ void layer_init(int layer){
 		PEConfig pe_config = s2chip_status.layer_config->pe;
 		PE_CTRL->CE = PE_CE_KERNEL( pe_config.ce.kernel) | PE_CE_STRIDE(pe_config.ce.stride);
 		PE_CTRL->COMPRESS = PE_COMPRESS_EN(pe_config.comp.en);
-		PE_CTRL->PE = PE_PE_FSIGN(pe_config.pe.fsign);
+		PE_CTRL->PE = PE_PE_FSIGN(pe_config.pe.fsign) | PE_PE_OUTDROP(0);
 			
 			//PPU
 		
@@ -116,9 +116,11 @@ void layer_init(int layer){
 
 void layer_run(int layer){ //主要使能各个dma
 
+		printf(">>>>>>>>>>> layer %d start <<<<<<<<<<<\n",layer);
     assert( layer < s2chip_status.net_config->layer_length);
 
     layer_init(layer);
+		printf(">>>>>>>>>>> layer %d reg init <<<<<<<<<<<\n",layer);
 	
 		dbg_puts_d( "layer %d init",layer );
 
@@ -130,36 +132,59 @@ void layer_run(int layer){ //主要使能各个dma
 		
     //int_enable( FMDMA_IRQ);
     //CALL_INT_HANDLER(FMDMA_IRQ);
-		INT_Enable(FMDMA_IRQ,FMDMA_INT_IO,FMDMA_INT_PORT);
-		FMDMA_IRQ_HANDLER();
+
     //int_enable( WMDMA_IRQ);
     //CALL_INT_HANDLER(WMDMA_IRQ);
+		INT_Enable(WBDMA_IRQ,WBDMA_INT_IO,WBDMA_INT_PORT);
+		WBDMA_IRQ_HANDLER();
+		
+		INT_Enable(BFDMA_IRQ,BFDMA_INT_IO,BFDMA_INT_PORT);
+		BFDMA_IRQ_HANDLER();
+	
+	
 		INT_Enable(WMDMA_IRQ,WMDMA_INT_IO,WMDMA_INT_PORT);
 		WMDMA_IRQ_HANDLER();
     
 		//CALL_INT_HANDLER(BFDMA_IRQ);
-		INT_Enable(BFDMA_IRQ,BFDMA_INT_IO,BFDMA_INT_PORT);
-		BFDMA_IRQ_HANDLER();
-		
     //int_enable( WBDMA_IRQ);
-    //CALL_INT_HANDLER(WBDMA_IRQ);
-		INT_Enable(WBDMA_IRQ,WBDMA_INT_IO,WBDMA_INT_PORT);
-		WBDMA_IRQ_HANDLER();
+    //CALL_INT_HANDLER(WBDMA_IRQ);		
+		INT_Enable(FMDMA_IRQ,FMDMA_INT_IO,FMDMA_INT_PORT);
+		FMDMA_IRQ_HANDLER();
 	
-		
+		printf(">>>>>>>>>>> layer %d dma init <<<<<<<<<<<\n",layer);
 
     WAIT( s2chip_status.module_state.fm == END &&
         s2chip_status.module_state.wm == END &&
         s2chip_status.module_state.bf == END &&
         s2chip_status.module_state.wb == END
     );
-
+		
+		printf(">>>>>>>>>>> layer %d dma end <<<<<<<<<<<\n",layer);
     return;
 }
 
 void pad_set_direction(int input){
 	 PAD_CTRL->ioen.ie1 = is_true(input);
 	 PAD_CTRL->ioen.oen1 = is_true(input);
+}
+
+
+void clk_set(int core_clk, int peri_clk){
+		CLKGEN_CTRL->CLK_SEL.AHB = peri_clk;
+		CLKGEN_CTRL->CLK_SEL.FM = core_clk;
+		CLKGEN_CTRL->CLK_SEL.WM = core_clk;
+		CLKGEN_CTRL->CLK_SEL.BBQS = peri_clk;
+		CLKGEN_CTRL->CLK_SEL.ACT  = peri_clk;
+		CLKGEN_CTRL->CLK_SEL.POOLING = peri_clk;
+		CLKGEN_CTRL->CLK_SEL.DC = peri_clk;
+		CLKGEN_CTRL->CLK_SEL.COMPRESS = core_clk;
+		CLKGEN_CTRL->CLK_SEL.PE	= core_clk;
+		CLKGEN_CTRL->CLK_SEL.CE = core_clk;
+		CLKGEN_CTRL->CLK_SEL.ALIGNMENT = core_clk;
+		CLKGEN_CTRL->CLK_SEL.SDRAM = 0; //必须133Mhz
+		CLKGEN_CTRL->CLK_SEL.DMA = peri_clk;
+		CLKGEN_CTRL->CLK_SEL.FIFO = peri_clk;
+		CLKGEN_CTRL->CLK_SEL.DBGCTL = peri_clk;
 }
 
 int _main_s2chip(){
@@ -174,9 +199,23 @@ int _main_s2chip(){
 		pad_set_direction(1);
 	
 	
-	
+
 		UartStdOutInit();
 		dbg_puts_d("uart init");
+	
+	
+			//提高部分区域频率
+
+		CLKGEN_CTRL->DIVIDE.N1 = 3;
+		CLKGEN_CTRL->DIVIDE.N2 = 10;
+
+
+		
+		clk_set(0,0);
+		dbg_puts_d("clk init");
+	
+		//丢弃PE输出
+	
 
     s2chip_init();
 	dbg_puts_d("s2chip init");
@@ -195,10 +234,10 @@ int _main_s2chip(){
 			
 				
         for(int layer = 0; layer < s2chip_status.net_config->layer_length;layer ++){
-						printf(">>>>>>>>>>> layer %d start <<<<<<<<<<<\n",layer);
+						//printf(">>>>>>>>>>> layer %d start <<<<<<<<<<<\n",layer);
             layer_run(layer);
 						//dbg_puts_d("layer %d done",layer);
-						printf(">>>>>>>>>>> layer %d done <<<<<<<<<<<\n",layer);
+						//printf(">>>>>>>>>>> layer %d done <<<<<<<<<<<\n",layer);
         }
 				
 				pad_set_direction(0);
