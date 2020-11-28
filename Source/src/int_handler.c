@@ -242,7 +242,7 @@ void FM_IRQ_Handler(){
 				
 				//配置ROUND READ（目前不使用）
 			
-				FM_CTRL->CONFIG_ROUND = FM_NEW_FLAG | FM_ROUND_READ_SIG(0) | FM_ROUND_READ_TIMES(0);
+				FM_CTRL->CONFIG_ROUND = FM_NEW_FLAG | FM_ROUND_READ_SIG(fm_config.round_read_sig) | FM_ROUND_READ_TIMES(fm_config.round_read_times);
 				fm_new_flag_update();
 			
 			
@@ -299,8 +299,6 @@ void FMDMA_IRQ_Handler(){
 	
 		volatile int* dma_outer_cnt = &(s2chip_status.module_inner_status.fmdma.dma_outer_cnt);
     volatile int* dma_cnt = &(s2chip_status.module_inner_status.fmdma.dma_cnt);
-		volatile int* dma_inner_cnt = &(s2chip_status.module_inner_status.fmdma.dma_inner_cnt);
-    FMDMAConfig dma_cfg = s2chip_status.layer_config->fm.config[*dma_cnt].dma;
 	
 	
 		dbg_puts_d(" dma_inner_cnt:%d,dma_cnt:%d,dma_outer_cnt:%d , dma_cfg_loop:%d,fm_config_length:%d,fm_loop:%d",
@@ -308,112 +306,29 @@ void FMDMA_IRQ_Handler(){
 			s2chip_status.layer_config->fm.config_length,s2chip_status.layer_config->fm.loop );
 	
 	
-    if( ((*dma_outer_cnt) <  (s2chip_status.layer_config->fm.loop)) &&
-				((*dma_cnt) < (s2chip_status.layer_config->fm.config_length)) && 
-        ((*dma_inner_cnt) < (dma_cfg.loop)) 
-        ){
-				
-				dbg_puts("dma_set:\tid:%s,\tcnt:(%d/%d),\n",GET_DMA_NAME(FMDMA),*dma_cnt,s2chip_status.layer_config->fm.config_length);
-					
-					
-				if( 1 ){
-					int dma_configs_len = MIN( dma_cfg.loop - *dma_inner_cnt,DMA_SG_MAX);
-					int fm_end = (dma_configs_len + *dma_inner_cnt)>=dma_cfg.loop;
-						
-						
-					//DMAConfig dma_configs[ dma_configs_len ];
-					//重新配置一系列FMDMA
-						
-					//配置DMA
-					dma_config( FMDMA, 0, dma_configs_len, fm_end); 
-					dbg_puts("sg_length:%d", dma_configs_len );
-						
-					//配置sg
-					for(int i = 0,rd_addr = dma_cfg.rd_addr + (*dma_inner_cnt)*dma_cfg.step ,wr_addr = dma_cfg.wr_addr + (*dma_inner_cnt)*dma_cfg.size
-							;i< dma_configs_len;i++){
-						
-						
-						dma_sg_set(FMDMA,i,rd_addr,wr_addr,dma_cfg.size);
-						
-						rd_addr += dma_cfg.step;
-						wr_addr += dma_cfg.size;
-						
-						
-					}
-					
-					
-									
-				 
-						
-					//更新计数器
-					(*dma_inner_cnt) += dma_configs_len;
-				}else{
-					
-					//int dma_configs_len = MIN( dma_cfg.loop - *dma_inner_cnt,32);
-					//int fm_end = (dma_configs_len + *dma_inner_cnt)>=dma_cfg.loop;
-						
-						
-					//DMAConfig dma_configs[ dma_configs_len ];
-					//重新配置一系列FMDMA
-						
-					
-					//每次最多只传1个
-					int sg = 0;
-					for(; data_cnt < dma_cfg.size && sg <DMA_SG_MAX;){
-						dma_sg_set(FMDMA,sg,dma_cfg.rd_addr+data_cnt,dma_cfg.wr_addr+data_cnt,16*16);
-						/*
-						dbg_puts_d("dma sg config1:\tid:%s,sg_num:%d,rd_addr:%x,wr_addr:%x,size:%x",GET_DMA_NAME(FMDMA),
-								sg,
-								dma_cfg.rd_addr + data_cnt + (*dma_inner_cnt)*dma_cfg.step,
-								0,
-								16*16
-						);
-						*/
-						data_cnt += 16*16;
-						sg ++;
-					}
-					
-					
-					int fm_end = ( *dma_inner_cnt == dma_cfg.loop -1 && (data_cnt >= dma_cfg.size) );
-						if( sg >= DMA_SG_MAX )
-					{
-						dma_config(FMDMA,0,DMA_SG_MAX,fm_end);
-						//dbg_puts_d("dma sg_num:%d, fm_end:%d,rd_addr:%x,wr_addr:%x",DMA_SG_MAX,fm_end,dma_cfg.rd_addr,dma_cfg.wr_addr);
-					}
-					else
-					{
-						
-						dma_config(FMDMA,0,sg,fm_end);
-						//dbg_puts_d("dma sg_num:%d, fm_end:%d",sg,fm_end);
-						//dbg_puts_d("dma sg_num:%d, fm_end:%d,rd_addr:%x,wr_addr:%x",sg,fm_end,dma_cfg.rd_addr,dma_cfg.wr_addr);
-					}
-					dbg_puts_d("dma sg_num:%d, fm_end:%d,rd_addr:%x,wr_addr:%x,cnt:%x",sg,fm_end,dma_cfg.rd_addr,dma_cfg.wr_addr,data_cnt);
-					
-					
+		if( ((*dma_outer_cnt) <  (s2chip_status.layer_config->fm.loop)) &&
+				((*dma_cnt) < (s2chip_status.layer_config->fm.config_length))
+		){
+			dbg_puts("dma_set:\tid:%s,\tcnt:(%d/%d),\n",GET_DMA_NAME(FMDMA),*dma_cnt,s2chip_status.layer_config->fm.config_length);
+			
+			int dma_configs_len = MIN( s2chip_status.layer_config->fm.config_length - *dma_cnt , DMA_SG_MAX);
+			
+			int fm_end = 0;
+			dma_config( FMDMA, 0, dma_configs_len, 0 ); 
+			dbg_puts("sg_length:%d", dma_configs_len );
+			
+			for( int i = 0 ; i < dma_configs_len ; i++){
+				FMDMAConfig dma_cfg = s2chip_status.layer_config->fm.config[i + (*dma_cnt)].dma;
+				dma_sg_ext_set( FMDMA, i , dma_cfg.rd_addr,dma_cfg.size,dma_cfg.step,dma_cfg.loop);
+							//dma_sg_set(FMDMA,i,rd_addr,wr_addr,dma_cfg.size);
+			}
 
-					//当某一块传完时，trans_byte_cnt归0,dma_cnt增加
-					if( data_cnt >= dma_cfg.size ){
-						data_cnt = 0;
-						(*dma_inner_cnt) += 1;
-					}
-
-					
-						
-				}
-				
-				if( *dma_inner_cnt >= dma_cfg.loop){
-					
-						*dma_inner_cnt = 0;
-						(*dma_cnt) ++;
-						if( *dma_cnt >= s2chip_status.layer_config->fm.config_length)
-						{
-							(*dma_outer_cnt) ++;
-							*dma_cnt = 0;
-						}
-				}
-				
-
-				
+			(*dma_cnt) += dma_configs_len;
+			if( *dma_cnt >= s2chip_status.layer_config->fm.config_length)
+			{
+				(*dma_outer_cnt) ++;
+				*dma_cnt = 0;
+			}				
 				//使能FMDMA
 				
 				INT_Clear(FMDMA_IRQ,FMDMA_INT_IO,FMDMA_INT_PORT);
@@ -426,7 +341,6 @@ void FMDMA_IRQ_Handler(){
         //s2chip_status.module_state.fm = END; //更新应该发生在FM结束后
 				s2chip_status.module_inner_status.fmdma.dma_outer_cnt = 0;
         s2chip_status.module_inner_status.fmdma.dma_cnt = 0;
-        s2chip_status.module_inner_status.fmdma.dma_inner_cnt = 0;
 				INT_Disable(FMDMA_IRQ,FMDMA_INT_IO,FMDMA_INT_PORT);
 				dma_weight_set(FMDMA,0);
     }

@@ -79,7 +79,7 @@ typedef struct {
         struct{
 						int volatile dma_outer_cnt;
             int volatile dma_cnt;
-            int volatile dma_inner_cnt;
+            //int volatile dma_inner_cnt;
 
         }fmdma;
 

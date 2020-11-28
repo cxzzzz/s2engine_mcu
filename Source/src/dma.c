@@ -125,6 +125,15 @@ inline void dma_sg_set(DMA_ID dma,uint8_t sg_idx,uint32_t rd_addr,uint32_t wr_ad
 	dma_ctrl -> CONFIG_DMA[sg_idx].LEN =  len - 1;
 }
 
+inline void dma_sg_ext_set( DMA_ID dma,uint8_t sg_idx,uint32_t rd_addr,uint32_t size , uint32_t step , uint32_t loop ){
+	volatile DMA_CTRL* dma_ctrl = DMA_CTRL_REG( dma );
+	assert( len%16 == 0);
+	assert( loop < 255 );
+
+	dma_ctrl -> CONFIG_DMA[sg_idx].RD_ADDR = rd_addr;
+	dma_ctrl -> CONFIG_DMA[sg_idx].SG_EXT = SG_EXT_LOOP( loop - 1) | SG_EXT_STEP(step);
+	dma_ctrl -> CONFIG_DMA[sg_idx].LEN =  size - 1;
+}
 
 
 int dma_int_clear(DMA_ID dma){

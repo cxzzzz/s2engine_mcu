@@ -51,11 +51,17 @@ typedef struct _DMA_CTRL{
 	//sg reg
 	struct{
 		uint32_t RD_ADDR;
-		uint32_t WR_ADDR;
+		union{
+			uint32_t WR_ADDR;
+			uint32_t SG_EXT;
+		};
 		uint32_t LEN;
 	}CONFIG_DMA[DMA_SG_MAX];
 	
 }DMA_CTRL;
+
+#define SG_EXT_LOOP(x) ((x) << 24)
+#define SG_EXT_STEP(x) ((x) << 0)
 
 struct _DMA_INFO{
 	uint32_t INFO_0;
@@ -85,6 +91,7 @@ void dma_reset(DMA_ID dma);
 int dma_int_clear(DMA_ID dma);
 
 void dma_sg_set(DMA_ID dma,uint8_t sg_idx,uint32_t rd_addr,uint32_t wr_addr,uint32_t len);
+void dma_sg_ext_set( DMA_ID dma,uint8_t sg_idx,uint32_t rd_addr,uint32_t size , uint32_t step , uint32_t loop );
 	
 void dma_enable(DMA_ID dma);
 
