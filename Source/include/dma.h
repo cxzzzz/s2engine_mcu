@@ -14,6 +14,8 @@ typedef enum {  //µØÖ·×÷ÎªID
 	BFDMA 	= 0x40260400,
 	BMDMA 	= 0x40260500,
 	WBDMA 	= 0x40260600,
+	ODIDMA  = 0x40260700,
+	ODODMA  = 0x40260800
 }DMA_ID;
 
 
@@ -79,6 +81,9 @@ extern volatile DMA_CTRL* BMDMA_CTRL;
 extern volatile DMA_CTRL* WBDMA_CTRL;
 extern volatile DMA_CTRL* IFDMA_CTRL;
 extern volatile DMA_CTRL* OFDMA_CTRL;
+
+extern volatile DMA_CTRL* ODIDMA_CTRL;
+extern volatile DMA_CTRL* ODODMA_CTRL;
 
 #define DMA_START(x) (is_true(x) << 0);
 #define DMA_TIMER_EN(x) (is_true(x) << 7);

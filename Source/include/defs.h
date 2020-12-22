@@ -120,6 +120,8 @@ extern volatile S2CHIP_STATUS s2chip_status;
 
 #define PAD_BASE_ADDR	0x40220000
 
+#define NMS_BASE_ADDR 0x402d0000
+
 
 
 ////////////////PPU CTRL REG
@@ -353,9 +355,54 @@ struct _PAD_CTRL{
 	uint32_t bootram_mode;
 	uint32_t data_out_mode;
 	uint32_t debug_mode;
+	
+	uint32_t pad_sdram_ds;
+	uint32_t power_out;
+	uint32_t power_in;
 
 };
 extern volatile struct _PAD_CTRL* PAD_CTRL;
+
+struct _NMS_CTRL{
+		struct{
+				uint32_t x;
+				uint32_t y;
+				uint32_t h;
+				uint32_t w;
+				uint32_t c;
+				uint32_t cls;
+		}factor;
+		
+		struct{
+				struct{
+					uint32_t xmax;
+					uint32_t ymax;
+					uint32_t nmax;
+				}post;
+				struct{
+						uint32_t xmax;
+						uint32_t ymax;
+				}orig;
+				struct{
+						uint32_t x;
+						uint32_t y;
+				}scale;
+				
+		}image;
+		
+		struct{
+				struct{
+						uint32_t h;
+						uint32_t w;
+				} anchors[8];
+		}anchor;
+		
+		struct{
+				uint32_t chance;
+				uint32_t iou;
+		}threshold;
+};
+extern volatile struct _NMS_CTRL* NMS_CTRL;
 
 /*
 void int_enable( IRQn_Type interrupt){

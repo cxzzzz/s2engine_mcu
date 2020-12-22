@@ -588,6 +588,31 @@
               <FileType>1</FileType>
               <FilePath>.\Source\src\test\net_test.c</FilePath>
             </File>
+            <File>
+              <FileName>sdram_test.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Source\src\test\sdram_test.c</FilePath>
+            </File>
+            <File>
+              <FileName>basic_test.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Source\src\test\basic_test.c</FilePath>
+            </File>
+            <File>
+              <FileName>ofifo_test.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\ofifo_test.c</FilePath>
+            </File>
+            <File>
+              <FileName>nms_test.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Source\src\test\nms_test.c</FilePath>
+            </File>
+            <File>
+              <FileName>pad_power_test.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Source\src\test\pad_power_test.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1072,6 +1097,31 @@
               <FileName>net_test.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\Source\src\test\net_test.c</FilePath>
+            </File>
+            <File>
+              <FileName>sdram_test.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Source\src\test\sdram_test.c</FilePath>
+            </File>
+            <File>
+              <FileName>basic_test.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Source\src\test\basic_test.c</FilePath>
+            </File>
+            <File>
+              <FileName>ofifo_test.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\ofifo_test.c</FilePath>
+            </File>
+            <File>
+              <FileName>nms_test.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Source\src\test\nms_test.c</FilePath>
+            </File>
+            <File>
+              <FileName>pad_power_test.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Source\src\test\pad_power_test.c</FilePath>
             </File>
           </Files>
         </Group>
