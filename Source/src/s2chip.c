@@ -44,6 +44,7 @@ void feature_load(){
 }
 
 void feature_store(){
+
     s2chip_status.module_state.feature_store = RUNNING;
 		s2chip_status.module_inner_status.feature_store.dma_cnt = 0;
 
@@ -52,11 +53,13 @@ void feature_store(){
 		INT_Enable(OFDMA_IRQ,OFDMA_INT_IO,OFDMA_INT_PORT);
 
     //CALL_INT_HANDLER(OFDMA_IRQ);
+	
 		OFDMA_IRQ_HANDLER();
-
+		
     WAIT( s2chip_status.module_state.feature_store == END);
 
     INT_Disable(OFDMA_IRQ,OFDMA_INT_IO,OFDMA_INT_PORT);
+
 }
 
 void layer_init(int layer){
@@ -205,9 +208,28 @@ int _main_s2chip(){
 	
 	
 			//提高部分区域频率
+	
+			/*
+		N1: core分频
+		N2: sdram分频
+		N3: mac分频
+		*/
 
-		CLKGEN_CTRL->DIVIDE.N1 = 3;
-		CLKGEN_CTRL->DIVIDE.N2 = 10;
+		/*
+		//该配置尽量提高 dma频率以提高数据供应速度，同时降低mac频率以提高加速比
+		CLKGEN_CTRL->DIVIDE.N2 = 8; 
+		CLKGEN_CTRL->DIVIDE.N1 = 9;
+		CLKGEN_CTRL->DIVIDE.N3 = 30;
+		*/
+			
+			
+
+		//该配置尽量提高 总体频率，以提高吞吐量
+		CLKGEN_CTRL->DIVIDE.N2 = 8; 
+		CLKGEN_CTRL->DIVIDE.N1 = 2;
+		CLKGEN_CTRL->DIVIDE.N3 = 3;
+		
+		
 
 
 		
@@ -245,6 +267,6 @@ int _main_s2chip(){
         feature_store();
 				dbg_puts_d("feature stored");		
 				
-				printf(">>>>>>>>>> output done >>>>>>>>>>>>>>>>>>>>");
+				printf(">>>>>>>>>> output done >>>>>>>>>>>>>>>>>>>>\n");
     }
 }
