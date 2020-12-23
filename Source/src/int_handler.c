@@ -301,8 +301,8 @@ void FMDMA_IRQ_Handler(){
     volatile int* dma_cnt = &(s2chip_status.module_inner_status.fmdma.dma_cnt);
 	
 	
-		dbg_puts_d(" dma_inner_cnt:%d,dma_cnt:%d,dma_outer_cnt:%d , dma_cfg_loop:%d,fm_config_length:%d,fm_loop:%d",
-			*dma_inner_cnt, *dma_cnt, *dma_outer_cnt , dma_cfg.loop, 
+		dbg_puts_d("dma_cnt:%d,dma_outer_cnt:%d ,fm_config_length:%d,fm_loop:%d",
+			 *dma_cnt, *dma_outer_cnt ,
 			s2chip_status.layer_config->fm.config_length,s2chip_status.layer_config->fm.loop );
 	
 	

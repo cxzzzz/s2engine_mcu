@@ -127,7 +127,7 @@ inline void dma_sg_set(DMA_ID dma,uint8_t sg_idx,uint32_t rd_addr,uint32_t wr_ad
 
 inline void dma_sg_ext_set( DMA_ID dma,uint8_t sg_idx,uint32_t rd_addr,uint32_t size , uint32_t step , uint32_t loop ){
 	volatile DMA_CTRL* dma_ctrl = DMA_CTRL_REG( dma );
-	assert( len%16 == 0);
+	//assert( len%16 == 0);
 	assert( loop < 255 );
 
 	dma_ctrl -> CONFIG_DMA[sg_idx].RD_ADDR = rd_addr;
