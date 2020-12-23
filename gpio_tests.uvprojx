@@ -613,6 +613,11 @@
               <FileType>1</FileType>
               <FilePath>.\Source\src\test\pad_power_test.c</FilePath>
             </File>
+            <File>
+              <FileName>fpga_basic_test.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Source\src\test\fpga_basic_test.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1122,6 +1127,11 @@
               <FileName>pad_power_test.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\Source\src\test\pad_power_test.c</FilePath>
+            </File>
+            <File>
+              <FileName>fpga_basic_test.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Source\src\test\fpga_basic_test.c</FilePath>
             </File>
           </Files>
         </Group>

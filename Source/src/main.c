@@ -19,12 +19,14 @@ extern int ofifo_test(void);
 
 extern int pad_power_test(void);
 
+extern int fpga_basic_test(void);
+
 
 extern int nms_test(void);
 int main(){
 		//FM_IRQ_Handler();
 		//while(1);
-		_main_s2chip();
+		//_main_s2chip();
     //dma_test();
     //reg_test();
     //wm_test(); 
@@ -37,4 +39,5 @@ int main(){
 		//ofifo_test();
 		//nms_test();
 		//pad_power_test();
+		fpga_basic_test();
 }

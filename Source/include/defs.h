@@ -8,6 +8,8 @@
 
 #include <stdio.h>
 
+#define FPGA_IMAGE
+
 #define NDEBUG
 
 #ifndef NDEBUG
