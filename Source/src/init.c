@@ -41,9 +41,9 @@ void s2chip_init(){
 	s2chip_status.io_config = &net_io;
   
 
-	dbg_puts_d("int init start");
+	//dbg_puts_d("int init start");
 	int_init();
-	dbg_puts_d("int init done");
+	//dbg_puts_d("int init done");
 }
 
 // 将Net数据Load到片上

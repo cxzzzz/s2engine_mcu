@@ -53,7 +53,7 @@
           <OutputName>gpio_tests</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
-          <CreateHexFile>0</CreateHexFile>
+          <CreateHexFile>1</CreateHexFile>
           <DebugInformation>1</DebugInformation>
           <BrowseInformation>1</BrowseInformation>
           <ListingPath>.\</ListingPath>
@@ -130,16 +130,16 @@
         </DebugOption>
         <Utilities>
           <Flash1>
-            <UseTargetDll>0</UseTargetDll>
-            <UseExternalTool>1</UseExternalTool>
+            <UseTargetDll>1</UseTargetDll>
+            <UseExternalTool>0</UseExternalTool>
             <RunIndependent>0</RunIndependent>
-            <UpdateFlashBeforeDebugging>1</UpdateFlashBeforeDebugging>
+            <UpdateFlashBeforeDebugging>0</UpdateFlashBeforeDebugging>
             <Capability>1</Capability>
-            <DriverSelection>-1</DriverSelection>
+            <DriverSelection>4100</DriverSelection>
           </Flash1>
-          <bUseTDR>1</bUseTDR>
-          <Flash2>BIN\UL2CM3.DLL</Flash2>
-          <Flash3></Flash3>
+          <bUseTDR>0</bUseTDR>
+          <Flash2>Segger\JL2CM3.dll</Flash2>
+          <Flash3>"" ()</Flash3>
           <Flash4></Flash4>
           <pFcarmOut></pFcarmOut>
           <pFcarmGrp></pFcarmGrp>
@@ -276,7 +276,7 @@
               <OCR_RVCT4>
                 <Type>1</Type>
                 <StartAddress>0x0</StartAddress>
-                <Size>0x8000</Size>
+                <Size>0x3000</Size>
               </OCR_RVCT4>
               <OCR_RVCT5>
                 <Type>1</Type>
@@ -301,7 +301,7 @@
               <OCR_RVCT9>
                 <Type>0</Type>
                 <StartAddress>0x20000000</StartAddress>
-                <Size>0x8000</Size>
+                <Size>0x4000</Size>
               </OCR_RVCT9>
               <OCR_RVCT10>
                 <Type>0</Type>
@@ -370,7 +370,7 @@
             <TextAddressRange>0x00000000</TextAddressRange>
             <DataAddressRange>0x00000000</DataAddressRange>
             <pXoBase></pXoBase>
-            <ScatterFile></ScatterFile>
+            <ScatterFile>gpio_tests.sct</ScatterFile>
             <IncludeLibs></IncludeLibs>
             <IncludeLibsPath></IncludeLibsPath>
             <Misc></Misc>
@@ -617,6 +617,31 @@
               <FileName>fpga_basic_test.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\Source\src\test\fpga_basic_test.c</FilePath>
+            </File>
+            <File>
+              <FileName>fpga_reg_test.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Source\src\test\fpga_reg_test.c</FilePath>
+            </File>
+            <File>
+              <FileName>misc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Source\src\misc.c</FilePath>
+            </File>
+            <File>
+              <FileName>ext_int_test.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Source\src\test\ext_int_test.c</FilePath>
+            </File>
+            <File>
+              <FileName>bus_access_test.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Source\src\test\bus_access_test.c</FilePath>
+            </File>
+            <File>
+              <FileName>fpga_s2chip.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Source\src\test\fpga_s2chip.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1132,6 +1157,31 @@
               <FileName>fpga_basic_test.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\Source\src\test\fpga_basic_test.c</FilePath>
+            </File>
+            <File>
+              <FileName>fpga_reg_test.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Source\src\test\fpga_reg_test.c</FilePath>
+            </File>
+            <File>
+              <FileName>misc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Source\src\misc.c</FilePath>
+            </File>
+            <File>
+              <FileName>ext_int_test.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Source\src\test\ext_int_test.c</FilePath>
+            </File>
+            <File>
+              <FileName>bus_access_test.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Source\src\test\bus_access_test.c</FilePath>
+            </File>
+            <File>
+              <FileName>fpga_s2chip.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Source\src\test\fpga_s2chip.c</FilePath>
             </File>
           </Files>
         </Group>

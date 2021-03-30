@@ -1,4 +1,5 @@
 
+
 extern int _main_s2chip(void);
 
 extern int dma_test(void);
@@ -20,9 +21,17 @@ extern int ofifo_test(void);
 extern int pad_power_test(void);
 
 extern int fpga_basic_test(void);
+extern int fpga_reg_test(void);
 
+extern int ext_int_test(void);
+
+extern int bus_access_test(void);
+
+
+extern int fpga_s2chip(void);
 
 extern int nms_test(void);
+
 int main(){
 		//FM_IRQ_Handler();
 		//while(1);
@@ -39,5 +48,10 @@ int main(){
 		//ofifo_test();
 		//nms_test();
 		//pad_power_test();
-		fpga_basic_test();
+		//fpga_basic_test();
+		//fpga_reg_test();
+		fpga_s2chip();
+		
+		//ext_int_test();
+		//bus_access_test();
 }

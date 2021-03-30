@@ -10,12 +10,19 @@
 
 #define FPGA_IMAGE
 
-#define NDEBUG
+//#define NDEBUG
+//#define FASTDEBUG
 
 #ifndef NDEBUG
-#define dbg_puts(fmt,...) printf(fmt,##__VA_ARGS__);
-#define dbg_puts_d(fmt,...) printf("%s:%s:%d:"fmt"\n",__FILE__,__FUNCTION__,__LINE__, ##__VA_ARGS__);
-#define assert( cond) if( !(cond)) printf("%s:%s:%d: assertion false",__FILE__,__FUNCTION__,__LINE__);
+	#ifdef FASTDEBUG
+		#define dbg_puts(fmt,...) printf(fmt,##__VA_ARGS__);
+		#define dbg_puts_d(fmt,...) printf(fmt"\n",##__VA_ARGS__);
+		#define assert( cond) if( !(cond)) printf("%s:%s:%d: assertion false",__FILE__,__FUNCTION__,__LINE__);
+	#else
+		#define dbg_puts(fmt,...) printf(fmt,##__VA_ARGS__);
+		#define dbg_puts_d(fmt,...) printf("%s:%s:%d:"fmt"\n",__FILE__,__FUNCTION__,__LINE__, ##__VA_ARGS__);
+		#define assert( cond) if( !(cond)) printf("%s:%s:%d: assertion false",__FILE__,__FUNCTION__,__LINE__);
+	#endif
 #else
 #define dbg_puts(fmt,...)
 #define dbg_puts_d(fmt,...)
@@ -102,8 +109,12 @@ extern volatile S2CHIP_STATUS s2chip_status;
 
 
 
+#define SDRAM_BASE_ADDR 0x44000000
+// size:byte
+#define SDRAM_SIZE 0x20000000 
 
-#define WAIT( cond ) while(!(cond)){ }
+
+#define WAIT( cond ) do{ dbg_puts_d("wait\n"); while(!(cond)); }while(0)
 
 
 #define PPU_BASE_ADDR 	0x402b0000
@@ -112,7 +123,7 @@ extern volatile S2CHIP_STATUS s2chip_status;
 
 #define DMA_BASE_ADDR		0x40260000
 
-#define SDRAM_BASE_ADDR	0x40270000
+//#define SDRAM_BASE_ADDR	0x40270000
 
 #define FM_BASE_ADDR 		0x40280000
 
@@ -124,6 +135,7 @@ extern volatile S2CHIP_STATUS s2chip_status;
 
 #define NMS_BASE_ADDR 0x402d0000
 
+#define EXT_INT_OUT_BASE_ADDR 0x41000000
 
 
 ////////////////PPU CTRL REG
@@ -405,6 +417,19 @@ struct _NMS_CTRL{
 		}threshold;
 };
 extern volatile struct _NMS_CTRL* NMS_CTRL;
+
+struct _EXT_INT_OUT_CTRL{
+	uint32_t int2; 
+	uint32_t int3;
+};
+extern volatile struct _EXT_INT_OUT_CTRL *EXT_INT_OUT_CTRL;
+
+struct _SDRAM{
+	uint32_t data[ SDRAM_SIZE/4 ];
+};
+
+extern volatile struct _SDRAM *SDRAM;
+
 
 /*
 void int_enable( IRQn_Type interrupt){

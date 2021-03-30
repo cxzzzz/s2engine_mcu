@@ -4,6 +4,14 @@
 #include "int_handler.h"
 
 
+void INT_Disable_All(){
+	__disable_irq();
+}
+
+void INT_Enable_All(){
+	__enable_irq();
+}
+
 
 void INT_Disable(IRQn_Type IRQ,CM3DS_MPS2_GPIO_TypeDef* gpio,int port){
 	NVIC_DisableIRQ(IRQ);
@@ -29,6 +37,9 @@ void dma_next_round( DMAGroupConfig dma_group_config,volatile int* dma_cnt, int 
 		 
 		//最开始把dma的中断信号清除
 		dma_int_clear(dma_id);
+		 
+		INT_Disable_All();
+		INT_Disable(interrupt,gpio,port);
 		 
 		int sg;
     assert( *dma_cnt <= dma_group_config.dma_length && *state == RUNNING);
@@ -58,8 +69,9 @@ void dma_next_round( DMAGroupConfig dma_group_config,volatile int* dma_cnt, int 
 				
 						DMAConfig* dma_config = & (dma_group_config.dma[ (*dma_cnt) + sg ]);
 						
-						dbg_puts_d("dma sg config0:\tid:%s,\tsgidx:%d,\trdaddr:0x%x,\twraddr:0x%x,\tsize:0x%x,",GET_DMA_NAME(dma_id),
-							sg, dma_config->rd_addr,dma_config->wr_addr,dma_config->size);
+						//dbg_puts_d("dma sg config0:\tid:%s,\tsgidx:%d,\trdaddr:0x%x,\twraddr:0x%x,\tsize:0x%x,",GET_DMA_NAME(dma_id),
+						//	sg, dma_config->rd_addr,dma_config->wr_addr,dma_config->size);
+					
 				
 						dma_sg_set( dma_id,sg, dma_config->rd_addr,dma_config->wr_addr,dma_config->size);
 					}
@@ -107,7 +119,7 @@ void dma_next_round( DMAGroupConfig dma_group_config,volatile int* dma_cnt, int 
       
         //清空中断
         
-				
+				dbg_puts_d("config end\n");
 
 				
 
@@ -116,22 +128,26 @@ void dma_next_round( DMAGroupConfig dma_group_config,volatile int* dma_cnt, int 
 				//dbg_puts_d("%s_irq_handler end",GET_DMA_NAME(dma_id));
 
         //使能DMA(靠后，尽量防止中断被过早再次进入)
-				INT_Clear(interrupt,gpio,port);
-				//INT_Enable(interrupt,gpio,port);
+
+				INT_Enable(interrupt,gpio,port);
         dma_enable(dma_id);
     }
     else{
-				//dbg_puts_d("dma_irq disable");
+					dbg_puts_d("dma_irq disable");
+					dbg_puts_d("%s_irq_handler end",GET_DMA_NAME(dma_id));
 			
         *dma_cnt = 0; 
         *state = END;
 			
-				//dbg_puts_d("%s_irq_handler end",GET_DMA_NAME(dma_id));
+			
 				//禁止中断
+				INT_Clear(interrupt,gpio,port);
 				INT_Disable(interrupt,gpio,port);
 				//降低dma权重为0,防止占用周期
 				dma_weight_set(dma_id,0);
     }
+		
+		INT_Enable_All();
 		
     return ;
 }
@@ -286,6 +302,8 @@ void FM_IRQ_Handler(){
 //INT_HANDLER( FMDMA_IRQ ){
 void FMDMA_IRQ_Handler(){
 	
+	INT_Disable_All();
+	
 		dbg_puts_d("%s_irq_handler start",GET_DMA_NAME(FMDMA));
 		
 		//软件分burst
@@ -345,6 +363,7 @@ void FMDMA_IRQ_Handler(){
 				dma_weight_set(FMDMA,0);
     }
 
+			INT_Enable_All();
 
 }
 
@@ -416,10 +435,24 @@ void OFDMA_IRQ_Handler(){
 }
 
 //INT_HANDLER(WBDMA_IRQ){
-void WBDMA_IRQ_HANDLER(){
+void WBDMA_IRQ_Handler(){
     dma_next_round(
         s2chip_status.layer_config->ppu.wb.dma,
         &s2chip_status.module_inner_status.wbdma.dma_cnt,1,
         &s2chip_status.module_state.wb,WBDMA,WBDMA_IRQ , WBDMA_INT_IO, WBDMA_INT_PORT, NULL//&wb_data_cnt
     );
+}
+
+
+extern volatile int int_0_flag;
+extern volatile int int_1_flag;
+void EXT_INT0_Handler(){
+	printf(" EXT_INT0 Handler\n");
+	int_0_flag= 1;
+	INT_Disable(EXT_INT0_IRQn,0,0);
+}
+void EXT_INT1_Handler(){
+	printf(" EXT_INT1 Handler\n");
+	int_1_flag = 1;
+	INT_Disable(EXT_INT1_IRQn,0,0);
 }

@@ -27,6 +27,7 @@ int dma_test(){
 		PAD_CTRL->ioen.oen1 = 1;
 	
 	UartStdOutInit();
+
 	dbg_puts_d("uart init");
 
     s2chip_init();

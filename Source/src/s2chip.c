@@ -155,7 +155,26 @@ void layer_run(int layer){ //主要使能各个dma
 		FMDMA_IRQ_HANDLER();
 	
 		printf(">>>>>>>>>>> layer %d dma init <<<<<<<<<<<\n",layer);
-
+		
+	
+		while(!(s2chip_status.module_state.fm == END &&
+        s2chip_status.module_state.wm == END &&
+        s2chip_status.module_state.bf == END &&
+        s2chip_status.module_state.wb == END)){
+						if(!(s2chip_status.module_state.fm == END)){
+							dbg_puts_d("wait fm");
+						}
+						if(!(s2chip_status.module_state.wm == END)){
+							dbg_puts_d("wait wm");
+						}
+						if(!(s2chip_status.module_state.bf == END)){
+							dbg_puts_d("wait bf");
+						}
+						if(!(s2chip_status.module_state.wb == END)){
+							dbg_puts_d("wait wb");
+						}
+				}
+		
     WAIT( s2chip_status.module_state.fm == END &&
         s2chip_status.module_state.wm == END &&
         s2chip_status.module_state.bf == END &&
@@ -204,6 +223,11 @@ int _main_s2chip(){
 	
 
 		UartStdOutInit();
+		/*uart_init(75.0, 38400);
+	
+		printf("slow uart init0\n");
+	
+		*/
 		dbg_puts_d("uart init");
 	
 	
@@ -222,31 +246,32 @@ int _main_s2chip(){
 		CLKGEN_CTRL->DIVIDE.N3 = 30;
 		*/
 			
-			
+			/*
 
 		//该配置尽量提高 总体频率，以提高吞吐量
 		CLKGEN_CTRL->DIVIDE.N2 = 8; 
 		CLKGEN_CTRL->DIVIDE.N1 = 2;
 		CLKGEN_CTRL->DIVIDE.N3 = 3;
-		
+		*/
 		
 
 
 		
 		clk_set(0,0);
-		dbg_puts_d("clk init");
+		//dbg_puts_d("clk init");
 	
 		//丢弃PE输出
 	
 
     s2chip_init();
-	dbg_puts_d("s2chip init");
+	//dbg_puts_d("s2chip init");
 	
 	
 
     net_init();
 		dbg_puts_d("net init");
 
+	
 	
     while(true){
 				pad_set_direction(1);

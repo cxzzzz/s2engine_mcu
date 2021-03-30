@@ -17,6 +17,10 @@ volatile struct _CLKGEN_CTRL* CLKGEN_CTRL = (struct _CLKGEN_CTRL*)( CLKGEN_BASE_
 
 volatile struct _NMS_CTRL* NMS_CTRL = (struct _NMS_CTRL *)(NMS_BASE_ADDR);
 
+volatile struct _EXT_INT_OUT_CTRL* EXT_INT_OUT_CTRL = (struct _EXT_INT_OUT_CTRL*)(EXT_INT_OUT_BASE_ADDR);
+
+volatile struct _SDRAM *SDRAM = (struct _SDRAM*)(SDRAM_BASE_ADDR);
+
 char fm_new_flag = 01;
 
 void fm_new_flag_update(void){

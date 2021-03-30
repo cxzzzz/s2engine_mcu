@@ -127,8 +127,8 @@ __Vectors       DCD     __initial_sp              ; Top of Stack
                 DCD     UART3_Handler             ; UART 3 RX and TX Handler
                 DCD     ETHERNET_Handler          ; Ethernet Handler
                 DCD     I2S_Handler               ; I2S Handler
-                DCD     MPS2_SPI0_Handler         ; SPI Handler (spi header)
-                DCD     MPS2_SPI1_Handler         ; SPI Handler (clcd)
+                DCD     EXT_INT0_Handler         ; SPI Handler (spi header)
+                DCD     EXT_INT1_Handler         ; SPI Handler (clcd)
                 DCD     MPS2_SPI2_Handler         ; SPI Handler (spi 1 ADC replacement)
                 DCD     MPS2_SPI3_Handler         ; SPI Handler (spi 0 shield 0 replacement)
                 DCD     MPS2_SPI4_Handler         ; SPI Handler
@@ -173,7 +173,7 @@ NMI_Handler     PROC
 HardFault_Handler\
                 PROC
                 EXPORT  HardFault_Handler         [WEAK]
-                B       .
+CL                B       .
                 ENDP
 MemManage_Handler\
                 PROC
@@ -260,8 +260,8 @@ Default_Handler PROC
                 EXPORT UART3_Handler              [WEAK]
                 EXPORT ETHERNET_Handler           [WEAK]
                 EXPORT I2S_Handler                [WEAK]
-                EXPORT MPS2_SPI0_Handler          [WEAK]
-                EXPORT MPS2_SPI1_Handler          [WEAK]
+                EXPORT EXT_INT0_Handler	          [WEAK]
+                EXPORT EXT_INT1_Handler	          [WEAK]
                 EXPORT MPS2_SPI2_Handler          [WEAK]
                 EXPORT MPS2_SPI3_Handler          [WEAK]
                 EXPORT MPS2_SPI4_Handler          [WEAK]
@@ -327,8 +327,8 @@ UART2_Handler
 UART3_Handler
 ETHERNET_Handler
 I2S_Handler
-MPS2_SPI0_Handler
-MPS2_SPI1_Handler
+EXT_INT0_Handler
+EXT_INT1_Handler
 MPS2_SPI2_Handler
 MPS2_SPI3_Handler
 MPS2_SPI4_Handler

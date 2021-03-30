@@ -1,3 +1,4 @@
+
 #include "init.h"
 #include "dma.h"
 
@@ -33,29 +34,5 @@ int fpga_basic_test(){
 		printf("slow uart init2\n");
 		printf("slow uart init3\n");
 
-		/*
-		UartStdOutInit();
-		printf("fast uart init\n");
-		printf("fast uart init\n");
-	*/
 
-	
-		/*
-			//提高部分区域频率
-
-		//该配置尽量提高 dma频率以提高数据供应速度，同时降低mac频率以提高加速比
-		CLKGEN_CTRL->DIVIDE.N1 = 8; //core分频
-		CLKGEN_CTRL->DIVIDE.N2 = 9;//dma分频
-		CLKGEN_CTRL->DIVIDE.N3 = 30;//mac/ppu分频
-		*/
-
-
-		
-		//clk_set(0,0);
-		//printf("clk init\n");
-		int iiii=0;
-		while(1){
-			printf("--------------m3 boot success!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n\n\n");
-			iiii += 1;
-		}
 }
